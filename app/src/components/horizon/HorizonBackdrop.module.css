@@ -1,0 +1,86 @@
+/* A fixed horizon behind every page: faint sky grid above, a glowing line, and a ground plane
+   drawn in perspective below. Content panels sit "on the ground". */
+
+.backdrop {
+  --horizon-y: 38vh;
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(var(--parallax, 0px));
+  will-change: transform;
+}
+
+.sky {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--horizon-y);
+  background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
+  background-size: 120px 100%;
+  background-position: center top;
+  mask-image: linear-gradient(to bottom, transparent, black 70%);
+}
+
+.glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--horizon-y);
+  height: 44vh;
+  transform: translateY(-50%);
+  background:
+    radial-gradient(55% 45% at 50% 50%, var(--horizon-glow-a), transparent 70%),
+    radial-gradient(95% 38% at 50% 50%, var(--horizon-glow-b), transparent 72%);
+  filter: blur(18px);
+}
+
+.line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--horizon-y);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--grid-line-strong) 18%,
+    var(--grid-line-strong) 82%,
+    transparent
+  );
+}
+
+.ground {
+  position: absolute;
+  left: 0;
+  top: var(--horizon-y);
+  width: 100%;
+  height: calc(100% - var(--horizon-y));
+  mask-image: linear-gradient(to bottom, transparent, black 16%, black 78%, rgb(0 0 0 / 25%));
+}
+
+.faint {
+  stroke: var(--grid-line);
+  stroke-width: 1;
+}
+
+.strong {
+  stroke: var(--grid-line-strong);
+  stroke-width: 1;
+}
+
+/* The floor breathes, very slowly. */
+.drift {
+  transform-origin: 50% 0;
+  animation: drift var(--dur-drift) var(--ease-in-out) infinite alternate;
+}
+
+@keyframes drift {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(1.035);
+  }
+}

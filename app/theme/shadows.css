@@ -1,0 +1,44 @@
+/* Shadows, glows and the tactile insets that give panels and controls a physical edge. */
+
+:root {
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 2px 6px rgb(0 0 0 / 45%), 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-3: 0 8px 24px rgb(0 0 0 / 50%), 0 2px 6px rgb(0 0 0 / 35%);
+  --shadow-4: 0 24px 64px rgb(0 0 0 / 60%), 0 8px 24px rgb(0 0 0 / 40%);
+
+  /* Tactile: a hairline highlight on the top edge and a shade on the bottom edge */
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 5%), inset 0 -1px 0 rgb(0 0 0 / 35%);
+  /* A recessed well (inputs, histogram tracks, slider rails) */
+  --shadow-well: inset 0 2px 6px rgb(0 0 0 / 55%), inset 0 1px 0 rgb(0 0 0 / 40%);
+  /* A raised bevel (buttons, slider thumbs) */
+  --shadow-bevel: inset 0 1px 0 rgb(255 255 255 / 10%), inset 0 -1px 0 rgb(0 0 0 / 40%),
+    0 1px 2px rgb(0 0 0 / 40%);
+
+  /* LED glows */
+  --glow-success: 0 0 0 1px rgb(181 242 106 / 35%), 0 0 10px rgb(181 242 106 / 55%);
+  --glow-error: 0 0 0 1px rgb(240 82 82 / 35%), 0 0 10px rgb(240 82 82 / 55%);
+  --glow-warn: 0 0 0 1px rgb(240 179 90 / 35%), 0 0 10px rgb(240 179 90 / 55%);
+  --glow-info: 0 0 0 1px rgb(95 211 230 / 35%), 0 0 10px rgb(95 211 230 / 55%);
+  --glow-accent: 0 0 0 1px rgb(139 123 255 / 35%), 0 0 12px rgb(139 123 255 / 55%);
+
+  --ring-focus: 0 0 0 2px var(--bg-canvas), 0 0 0 4px var(--accent);
+}
+
+:root[data-theme="light"] {
+  --shadow-1: 0 1px 2px rgb(20 20 24 / 10%);
+  --shadow-2: 0 2px 6px rgb(20 20 24 / 10%), 0 1px 2px rgb(20 20 24 / 6%);
+  --shadow-3: 0 8px 24px rgb(20 20 24 / 12%), 0 2px 6px rgb(20 20 24 / 8%);
+  --shadow-4: 0 24px 64px rgb(20 20 24 / 18%), 0 8px 24px rgb(20 20 24 / 10%);
+
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 80%), inset 0 -1px 0 rgb(20 20 24 / 8%);
+  --shadow-well: inset 0 2px 6px rgb(20 20 24 / 14%), inset 0 1px 0 rgb(20 20 24 / 8%);
+  --shadow-bevel: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -1px 0 rgb(20 20 24 / 12%),
+    0 1px 2px rgb(20 20 24 / 12%);
+
+  --glow-success: 0 0 0 1px rgb(111 181 44 / 35%), 0 0 10px rgb(111 181 44 / 45%);
+  --glow-error: 0 0 0 1px rgb(217 56 61 / 35%), 0 0 10px rgb(217 56 61 / 45%);
+  --glow-warn: 0 0 0 1px rgb(184 120 31 / 35%), 0 0 10px rgb(184 120 31 / 45%);
+  --glow-info: 0 0 0 1px rgb(42 147 166 / 35%), 0 0 10px rgb(42 147 166 / 45%);
+  --glow-accent: 0 0 0 1px rgb(110 86 255 / 35%), 0 0 12px rgb(110 86 255 / 45%);
+}

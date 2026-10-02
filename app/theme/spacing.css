@@ -1,0 +1,53 @@
+/* Spacing. A 4px scale plus the semantic distances layouts actually use. */
+
+:root {
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
+
+  /* Page */
+  --page-margin: var(--space-8);
+  --page-margin-sm: var(--space-4);
+  --page-max-width: 1440px;
+  --section-gap: var(--space-8);
+
+  /* Panels and groups */
+  --panel-pad: var(--space-5);
+  --panel-pad-dense: var(--space-3);
+  --grid-gap: var(--space-4);
+  --stack-gap: var(--space-3);
+  --stack-gap-sm: var(--space-2);
+  --inline-gap: var(--space-2);
+  --inline-gap-sm: var(--space-1);
+
+  /* Chrome */
+  --sidebar-width: 232px;
+  --topbar-height: 52px;
+
+  /* Controls */
+  --control-height-sm: 28px;
+  --control-height: 34px;
+  --control-height-lg: 40px;
+  --control-pad-x: var(--space-3);
+  --icon-size: 16px;
+  --icon-size-sm: 14px;
+  --icon-size-lg: 20px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --page-margin: var(--page-margin-sm);
+    --panel-pad: var(--space-4);
+  }
+}

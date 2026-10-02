@@ -1,0 +1,32 @@
+.panel {
+  padding: var(--panel-pad);
+  border: var(--border-1) solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-inset), var(--shadow-1);
+}
+
+.dense {
+  padding: var(--panel-pad-dense);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--inline-gap);
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-gap);
+}

@@ -1,0 +1,130 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100vh;
+  padding: var(--space-5) var(--space-3);
+  border-right: var(--border-1) solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-canvas) 72%, transparent);
+  backdrop-filter: blur(14px);
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-gap);
+  padding: var(--space-1) var(--space-2) var(--space-5);
+  color: var(--fg);
+}
+
+.mark {
+  color: var(--status-warn);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--status-warn) 50%, transparent));
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: var(--tracking-snug);
+  line-height: 1;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.item:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.item[data-active] {
+  background: var(--bg-active);
+  color: var(--fg);
+  box-shadow: var(--shadow-inset);
+}
+
+/* A small lit bar on the active item, like an indicator lamp */
+.item[data-active]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: var(--space-2) var(--space-2) 0;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--fg-faint);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Narrow viewports: collapse to an icon rail */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 60px;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    align-items: center;
+  }
+
+  .brand {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .wordmark,
+  .meta,
+  .item span {
+    display: none;
+  }
+
+  .nav {
+    width: 100%;
+  }
+
+  .item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .footer {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

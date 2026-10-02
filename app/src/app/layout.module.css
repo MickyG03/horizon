@@ -1,0 +1,16 @@
+.frame {
+  position: relative;
+  z-index: var(--z-base);
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--page-margin);
+}
+
+.main > * {
+  max-width: var(--page-max-width);
+}

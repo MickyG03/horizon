@@ -1,0 +1,37 @@
+[project]
+name = "horizon-server"
+version = "0.1.0"
+description = "Horizon API: runs HUD evals locally, streams every step, triages failures and scores training signal."
+readme = { text = "See the repository README.", content-type = "text/plain" }
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "sqlmodel>=0.0.22",
+  "pydantic-settings>=2.5",
+  "sse-starlette>=2.1",
+  "hud>=0.6.19,<0.7",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.27",
+  "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

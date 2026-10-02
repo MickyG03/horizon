@@ -1,0 +1,35 @@
+# Python
+.venv/
+.venv-*/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local data and secrets
+data/
+*.db
+*.db-journal
+.env
+.env.local
+
+# Scratch environment used during setup (not part of the project)
+my-env/
+
+# Editors / OS / assistant config
+.vscode/
+.idea/
+.claude/
+.DS_Store
+
+# Markdown: only README.md is tracked
+*.md
+!README.md

@@ -1,0 +1,25 @@
+/* Borders and radii. */
+
+:root {
+  --border-hair: 0.5px;
+  --border-1: 1px;
+  --border-2: 2px;
+
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --border-subtle: rgb(255 255 255 / 6%);
+  --border-default: var(--ink-600);
+  --border-strong: var(--ink-500);
+  --border-accent: var(--accent);
+}
+
+:root[data-theme="light"] {
+  --border-subtle: rgb(20 20 24 / 8%);
+  --border-default: var(--paper-300);
+  --border-strong: var(--paper-400);
+}

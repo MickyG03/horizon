@@ -1,0 +1,148 @@
+/* Colors.
+   Primitives are raw palette steps. Semantic tokens are what components use.
+   Dark ("dusk") is the default on :root; [data-theme="light"] ("dawn") overrides the semantic layer. */
+
+:root {
+  /* Ink: dark surfaces */
+  --ink-950: #07070a;
+  --ink-900: #0b0b0e;
+  --ink-850: #101014;
+  --ink-800: #141418;
+  --ink-750: #18181d;
+  --ink-700: #1e1e24;
+  --ink-600: #26262d;
+  --ink-500: #34343c;
+  --ink-400: #4a4a54;
+  --ink-300: #6b6b76;
+  --ink-200: #9a9aa3;
+  --ink-100: #c9c9d0;
+  --ink-50: #ededf0;
+
+  /* Paper + sky: light surfaces */
+  --paper-50: #fbfaf7;
+  --paper-100: #f4f2ec;
+  --paper-200: #e9e6dd;
+  --paper-300: #d9d5c9;
+  --paper-400: #bdb9ae;
+  --sky-100: #e6edf3;
+  --sky-200: #d3dfe9;
+  --sky-300: #b9cad9;
+  --sky-400: #9bb2c6;
+  --sky-500: #7f9ab2;
+
+  /* Signal hues */
+  --lime-300: #d2f79a;
+  --lime-400: #b5f26a;
+  --lime-500: #9ae04c;
+  --lime-600: #6fb52c;
+  --coral-300: #ff9a9a;
+  --coral-400: #f05252;
+  --coral-500: #d9383d;
+  --coral-600: #b32a2e;
+  --amber-300: #f6d59a;
+  --amber-400: #f0b35a;
+  --amber-500: #d9963a;
+  --amber-600: #b8781f;
+  --violet-300: #a99bff;
+  --violet-400: #8b7bff;
+  --violet-500: #6e56ff;
+  --violet-600: #5a44d9;
+  --cyan-300: #8fe3f0;
+  --cyan-400: #5fd3e6;
+  --cyan-500: #3fb8cc;
+  --cyan-600: #2a93a6;
+
+  /* Semantic: dusk */
+  color-scheme: dark;
+
+  --bg-canvas: var(--ink-900);
+  --bg-panel: var(--ink-800);
+  --bg-panel-raised: var(--ink-700);
+  --bg-inset: var(--ink-950);
+  --bg-hover: rgb(255 255 255 / 4%);
+  --bg-active: rgb(255 255 255 / 7%);
+  --bg-scrim: rgb(0 0 0 / 60%);
+
+  --fg: var(--ink-50);
+  --fg-muted: var(--ink-200);
+  --fg-faint: var(--ink-300);
+  --fg-on-accent: var(--ink-900);
+
+  --accent: var(--violet-400);
+  --accent-strong: var(--violet-500);
+  --accent-soft: rgb(110 86 255 / 16%);
+
+  --status-success: var(--lime-400);
+  --status-error: var(--coral-400);
+  --status-warn: var(--amber-400);
+  --status-info: var(--cyan-400);
+  --status-running: var(--violet-400);
+  --status-idle: var(--ink-300);
+
+  /* Failure causes (see server/services/triage.py) */
+  --cause-ok: var(--lime-400);
+  --cause-agent: var(--coral-400);
+  --cause-infra: var(--amber-400);
+  --cause-env: var(--cyan-400);
+  --cause-grader: var(--violet-400);
+
+  /* Categorical series for charts */
+  --viz-1: var(--lime-400);
+  --viz-2: var(--violet-400);
+  --viz-3: var(--cyan-400);
+  --viz-4: var(--amber-400);
+  --viz-5: var(--coral-400);
+  --viz-6: var(--sky-400);
+
+  /* Horizon motif */
+  --grid-line: rgb(255 255 255 / 5%);
+  --grid-line-strong: rgb(255 255 255 / 11%);
+  --horizon-glow-a: rgb(255 196 120 / 20%);
+  --horizon-glow-b: rgb(110 86 255 / 14%);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-canvas: var(--sky-100);
+  --bg-panel: var(--paper-50);
+  --bg-panel-raised: #ffffff;
+  --bg-inset: var(--sky-200);
+  --bg-hover: rgb(20 20 24 / 4%);
+  --bg-active: rgb(20 20 24 / 8%);
+  --bg-scrim: rgb(20 20 24 / 40%);
+
+  --fg: #141418;
+  --fg-muted: #5a5f6a;
+  --fg-faint: #8a909b;
+  --fg-on-accent: #ffffff;
+
+  --accent: var(--violet-500);
+  --accent-strong: var(--violet-600);
+  --accent-soft: rgb(110 86 255 / 12%);
+
+  --status-success: var(--lime-600);
+  --status-error: var(--coral-500);
+  --status-warn: var(--amber-600);
+  --status-info: var(--cyan-600);
+  --status-running: var(--violet-500);
+  --status-idle: #8a909b;
+
+  --cause-ok: var(--lime-600);
+  --cause-agent: var(--coral-500);
+  --cause-infra: var(--amber-600);
+  --cause-env: var(--cyan-600);
+  --cause-grader: var(--violet-500);
+
+  --viz-1: var(--lime-600);
+  --viz-2: var(--violet-500);
+  --viz-3: var(--cyan-600);
+  --viz-4: var(--amber-600);
+  --viz-5: var(--coral-500);
+  --viz-6: var(--sky-500);
+
+  --grid-line: rgb(20 20 24 / 6%);
+  --grid-line-strong: rgb(20 20 24 / 13%);
+  --horizon-glow-a: rgb(255 170 90 / 38%);
+  --horizon-glow-b: rgb(127 154 178 / 30%);
+}
