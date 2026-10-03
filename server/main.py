@@ -8,21 +8,27 @@ from config import settings
 
 os.environ["HUD_TELEMETRY_ENABLED"] = "true" if settings.telemetry_sync else "false"
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import health
+from api import envs, events, health, jobs, providers, runs
 from db.engine import init_db
+from services.runner import runner
 
 VERSION = "0.1.0"
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.getLogger("hud.agents").setLevel(logging.INFO)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
     yield
+    await runner.shutdown()
 
 
 def create_app() -> FastAPI:
@@ -33,7 +39,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(health.router, prefix="/api")
+    for router in (health, providers, envs, jobs, runs, events):
+        app.include_router(router.router, prefix="/api")
     return app
 
 

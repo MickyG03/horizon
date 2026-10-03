@@ -43,6 +43,8 @@ class Job(SQLModel, table=True):
     group_size: int = 1
     max_steps: int = 10
     max_concurrent: int = 8
+    # Extra agent config (base_url for OpenAI-compatible servers, temperature, ...). Never keys.
+    agent_config: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     task_filter: list[str] | None = Field(default=None, sa_column=Column(JSON))
     status: str = Field(default="queued", index=True)  # queued|running|finished|cancelled|failed
     created_at: datetime = Field(default_factory=utcnow)
