@@ -1,0 +1,13 @@
+.form {
+  max-width: 720px;
+}
+
+.row {
+  display: flex;
+  gap: var(--inline-gap);
+}
+
+.row input {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}

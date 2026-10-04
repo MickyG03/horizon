@@ -4,10 +4,9 @@ import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import "@theme/index.css";
 
 import { HorizonBackdrop } from "@/components/horizon/HorizonBackdrop";
-import { Sidebar } from "@/components/shell/Sidebar";
+import { Chrome } from "@/components/shell/Chrome";
 import { ThemeScript } from "@/components/shell/ThemeScript";
 
-import styles from "./layout.module.css";
 import { Providers } from "./providers";
 
 const sans = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -42,10 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <Providers>
           <HorizonBackdrop />
-          <div className={styles.frame}>
-            <Sidebar />
-            <main className={styles.main}>{children}</main>
-          </div>
+          <Chrome>{children}</Chrome>
         </Providers>
       </body>
     </html>

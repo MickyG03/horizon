@@ -1,0 +1,53 @@
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.tile {
+  --tile-color: var(--status-idle);
+
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--tile-color);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 25%),
+    0 0 6px color-mix(in srgb, var(--tile-color) 45%, transparent);
+  transition: background var(--dur-slow) var(--ease-out);
+}
+
+.sm .tile {
+  width: 7px;
+  height: 10px;
+  border-radius: 1.5px;
+}
+
+.tile[data-pending] {
+  background: transparent;
+  border: var(--border-1) solid var(--border-strong);
+  box-shadow: none;
+}
+
+.tile[data-running] {
+  animation: blink var(--dur-pulse) var(--ease-in-out) infinite;
+}
+
+.more {
+  margin-left: var(--inline-gap-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--fg-muted);
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}

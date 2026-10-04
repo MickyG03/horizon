@@ -1,0 +1,230 @@
+.timeline {
+  --rail-x: 11px;
+
+  position: relative;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-left: var(--space-8);
+}
+
+/* The rail */
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--border-strong), var(--border-subtle));
+}
+
+.item {
+  position: relative;
+}
+
+.dot {
+  --dot-color: var(--fg-faint);
+
+  position: absolute;
+  left: calc(var(--rail-x) - var(--space-8) + 1px);
+  top: 13px;
+  width: 9px;
+  height: 9px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background: var(--dot-color);
+  box-shadow:
+    0 0 0 3px var(--bg-canvas),
+    0 0 8px color-mix(in srgb, var(--dot-color) 60%, transparent);
+}
+
+.dot[data-kind="user"] {
+  --dot-color: var(--status-info);
+}
+
+.dot[data-kind="agent"] {
+  --dot-color: var(--accent);
+}
+
+.dot[data-kind="tool"] {
+  --dot-color: var(--fg-muted);
+}
+
+.dot[data-kind="grade"] {
+  --dot-color: var(--status-success);
+}
+
+.dot[data-kind="error"] {
+  --dot-color: var(--status-error);
+}
+
+.dot[data-kind="running"] {
+  --dot-color: var(--status-running);
+  animation: breathe var(--dur-pulse) var(--ease-in-out) infinite;
+}
+
+.card {
+  border: var(--border-1) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-inset), var(--shadow-1);
+  overflow: hidden;
+}
+
+.card[data-kind="agent"] {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+}
+
+.card[data-kind="error"] {
+  border-color: color-mix(in srgb, var(--status-error) 40%, var(--border-subtle));
+}
+
+.card[data-kind="grade"] {
+  border-color: color-mix(in srgb, var(--status-success) 30%, var(--border-subtle));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  background: color-mix(in srgb, var(--bg-inset) 35%, transparent);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  color: var(--fg-muted);
+}
+
+.title {
+  font-weight: var(--weight-medium);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.duration,
+.usage {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--fg-faint);
+}
+
+.score {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--status-error);
+}
+
+.score[data-pass] {
+  color: var(--status-success);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.kv,
+.finish {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.muted {
+  color: var(--fg-muted);
+}
+
+.prompt {
+  white-space: pre-wrap;
+}
+
+.content {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  white-space: pre-wrap;
+  color: var(--fg);
+}
+
+.reasoning summary,
+.args summary {
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  user-select: none;
+}
+
+.reasoning summary:hover,
+.args summary:hover {
+  color: var(--fg);
+}
+
+.reasoningText,
+.toolResult,
+.args pre,
+.error {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  max-height: 320px;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-well);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--fg-muted);
+}
+
+.error {
+  margin-top: 0;
+  color: var(--status-error);
+}
+
+.calls {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.call {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.waiting {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+}
+
+.waitingText {
+  font-size: var(--text-xs);
+  color: var(--fg-faint);
+  font-style: italic;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

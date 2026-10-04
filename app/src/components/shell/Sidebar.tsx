@@ -1,9 +1,13 @@
 "use client";
 
-import { Boxes, GitCompare, LayoutDashboard, ListChecks, Settings } from "lucide-react";
+import { Boxes, GitCompare, LayoutDashboard, ListChecks, Plus, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Kbd } from "@/components/primitives/Kbd";
+import { useHealth } from "@/lib/queries";
+
+import { openPalette } from "./CommandPalette";
 import { ThemeToggle } from "./ThemeToggle";
 import styles from "./Sidebar.module.css";
 
@@ -19,8 +23,10 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function Sidebar() {
+export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
   const pathname = usePathname();
+  const health = useHealth();
+  const online = health.isSuccess;
 
   return (
     <aside className={styles.sidebar}>
@@ -28,6 +34,21 @@ export function Sidebar() {
         <HorizonMark />
         <span className={styles.wordmark}>Horizon</span>
       </Link>
+
+      <div className={styles.actions}>
+        <button type="button" className={styles.primary} onClick={onNewRun}>
+          <Plus size={14} strokeWidth={2.2} aria-hidden />
+          <span>New run</span>
+        </button>
+        <button type="button" className={styles.search} onClick={openPalette} aria-label="Search">
+          <Search size={14} aria-hidden />
+          <span className={styles.searchLabel}>Search</span>
+          <span className={styles.kbd}>
+            <Kbd>⌘</Kbd>
+            <Kbd>K</Kbd>
+          </span>
+        </button>
+      </div>
 
       <nav className={styles.nav} aria-label="Primary">
         {NAV.map(({ href, label, icon: Icon }) => {
@@ -49,7 +70,10 @@ export function Sidebar() {
 
       <div className={styles.footer}>
         <ThemeToggle />
-        <span className={styles.meta}>local · offline</span>
+        <span className={styles.meta} data-online={online || undefined}>
+          <span className={styles.dot} />
+          {online ? `api · hud ${health.data?.hud}` : "api offline"}
+        </span>
       </div>
     </aside>
   );

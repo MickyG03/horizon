@@ -1,0 +1,89 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--fg-muted);
+}
+
+.hint {
+  font-size: var(--text-2xs);
+  line-height: var(--leading-2xs);
+  color: var(--fg-faint);
+}
+
+.error {
+  font-size: var(--text-2xs);
+  line-height: var(--leading-2xs);
+  color: var(--status-error);
+}
+
+/* A recessed well, like an instrument readout */
+.control {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 var(--control-pad-x);
+  border-radius: var(--radius-sm);
+  border: var(--border-1) solid var(--border-subtle);
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-well);
+  color: var(--fg);
+  font-size: var(--text-sm);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.control::placeholder {
+  color: var(--fg-faint);
+}
+
+.control:focus-visible {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-well), var(--ring-focus);
+}
+
+.control:disabled {
+  opacity: 0.55;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.selectWrap::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--fg-muted);
+  border-bottom: 1.5px solid var(--fg-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.select {
+  appearance: none;
+  padding-right: var(--space-8);
+}
+
+.textarea {
+  height: auto;
+  min-height: 80px;
+  padding: var(--space-2) var(--control-pad-x);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  resize: vertical;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--grid-gap);
+}

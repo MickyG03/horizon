@@ -1,0 +1,10 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--grid-gap);
+}
+
+.delta {
+  color: var(--cause-ok);
+  font-weight: var(--weight-semibold);
+}

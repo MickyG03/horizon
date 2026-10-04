@@ -1,0 +1,42 @@
+.led {
+  --led-color: var(--status-idle);
+  --led-size: 8px;
+
+  display: inline-block;
+  width: var(--led-size);
+  height: var(--led-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: radial-gradient(
+    circle at 35% 35%,
+    color-mix(in srgb, var(--led-color) 55%, white),
+    var(--led-color) 60%,
+    color-mix(in srgb, var(--led-color) 70%, black)
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--led-color) 35%, transparent),
+    0 0 calc(var(--led-size) * 1.2) color-mix(in srgb, var(--led-color) 55%, transparent),
+    inset 0 -1px 1px rgb(0 0 0 / 30%);
+}
+
+.led[data-pulse] {
+  animation: pulse var(--dur-pulse) var(--ease-in-out) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--led-color) 35%, transparent),
+      0 0 calc(var(--led-size) * 1.2) color-mix(in srgb, var(--led-color) 55%, transparent),
+      inset 0 -1px 1px rgb(0 0 0 / 30%);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--led-color) 20%, transparent),
+      0 0 calc(var(--led-size) * 2.2) color-mix(in srgb, var(--led-color) 75%, transparent),
+      inset 0 -1px 1px rgb(0 0 0 / 30%);
+  }
+}

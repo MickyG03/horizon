@@ -32,6 +32,61 @@
   line-height: 1;
 }
 
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inline-gap);
+  height: var(--control-height);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-bevel);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.primary:hover {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-gap);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: var(--border-1) solid var(--border-subtle);
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-well);
+  color: var(--fg-faint);
+  font-size: var(--text-xs);
+}
+
+.search:hover {
+  color: var(--fg-muted);
+}
+
+.searchLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.kbd {
+  display: inline-flex;
+  gap: 2px;
+}
+
 .nav {
   display: flex;
   flex-direction: column;
@@ -82,15 +137,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--inline-gap);
   margin-top: auto;
   padding: var(--space-2) var(--space-2) 0;
 }
 
 .meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--inline-gap-sm);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   color: var(--fg-faint);
   letter-spacing: var(--tracking-wide);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--status-error);
+  box-shadow: var(--glow-error);
+}
+
+.meta[data-online] .dot {
+  background: var(--status-success);
+  box-shadow: var(--glow-success);
 }
 
 /* Narrow viewports: collapse to an icon rail */
@@ -109,12 +182,22 @@
 
   .wordmark,
   .meta,
+  .searchLabel,
+  .kbd,
+  .primary span,
   .item span {
     display: none;
   }
 
+  .actions,
   .nav {
     width: 100%;
+  }
+
+  .search,
+  .primary {
+    justify-content: center;
+    padding: 0;
   }
 
   .item {
@@ -123,7 +206,7 @@
   }
 
   .footer {
-    justify-content: center;
+    flex-direction: column;
     padding-left: 0;
     padding-right: 0;
   }
