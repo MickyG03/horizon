@@ -3,17 +3,20 @@
 import { Ban, RotateCcw, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { LED } from "@/components/horizon/LED";
 import { Badge } from "@/components/primitives/Badge";
 import { Button } from "@/components/primitives/Button";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { fmtDateTime, fmtRelative } from "@/lib/format";
-import { useCancelJob, useDeleteJob, useJob, useRerunJob } from "@/lib/queries";
+import { useCancelJob, useDeleteJob, useJob, useJobAnalytics, useRerunJob } from "@/lib/queries";
 import { useJobEvents } from "@/lib/sse";
 import { JOB_STATUS_LABEL, jobStatusColor } from "@/lib/triage";
 
 import { RunsTable } from "./RunsTable";
+import { ScorePanel } from "./ScorePanel";
+import { SignalPanel } from "./SignalPanel";
 import { SummaryTiles } from "./SummaryTiles";
 import { TriageBreakdown } from "./TriageBreakdown";
 import styles from "./JobView.module.css";
@@ -23,6 +26,10 @@ export function JobView({ id }: { id: string }) {
   const { data: job, error } = useJob(id);
   const live = job?.status === "running" || job?.status === "queued";
   const connected = useJobEvents(id, Boolean(live));
+
+  const [bins, setBins] = useState(5);
+  const [validOnly, setValidOnly] = useState(false);
+  const { data: analytics } = useJobAnalytics(id, bins, Boolean(live));
 
   const cancel = useCancelJob();
   const rerun = useRerunJob();
@@ -111,8 +118,17 @@ export function JobView({ id }: { id: string }) {
       <SummaryTiles job={job} />
 
       <div className={styles.columns}>
+        <ScorePanel
+          analytics={analytics}
+          bins={bins}
+          onBinsChange={setBins}
+          validOnly={validOnly}
+          onValidOnlyChange={setValidOnly}
+        />
         <TriageBreakdown summary={job.summary} />
       </div>
+
+      <SignalPanel analytics={analytics} groupSize={job.group_size} />
 
       <section className={styles.runs}>
         <h2 className="t-overline">Runs</h2>

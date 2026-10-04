@@ -1,0 +1,76 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.label {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 140px;
+  height: 24px;
+  touch-action: none;
+  user-select: none;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-well);
+}
+
+.range {
+  position: absolute;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+}
+
+/* The knob: bevelled, with fine ridges across its face */
+.thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 2px,
+      rgb(0 0 0 / 18%) 2px 3px
+    ),
+    var(--bg-panel-raised);
+  box-shadow: var(--shadow-bevel), 0 0 0 1px var(--border-default);
+  cursor: grab;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.thumb:hover {
+  box-shadow: var(--shadow-bevel), 0 0 0 1px var(--accent);
+}
+
+.thumb:active {
+  cursor: grabbing;
+}
+
+.thumb:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-bevel), var(--ring-focus);
+}
+
+.value {
+  min-width: 2ch;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--fg);
+}

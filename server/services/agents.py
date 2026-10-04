@@ -37,8 +37,13 @@ class ScriptedConfig(AgentConfig):
 class ScriptedAgent(Agent):
     config_cls = ScriptedConfig
 
+    # Sentinel answer: reply with the task's own prompt (grader probes use it).
+    ECHO_PROMPT = "__HORIZON_ECHO_PROMPT__"
+
     async def __call__(self, run: Any) -> None:
         text = self.config.answer  # type: ignore[attr-defined]
+        if text == self.ECHO_PROMPT:
+            text = getattr(run, "prompt_text", None) or ""
         run.trace.content = text  # the only thing the grader reads
         run.trace.stop_reason = "done"
         run.record(AgentStep(content=text, done=True))

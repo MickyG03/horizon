@@ -1,4 +1,15 @@
-import type { Env, Job, JobCreate, JobDetail, Provider, Run, RunDetail } from "@/types/api";
+import type {
+  CompareResult,
+  Env,
+  Job,
+  JobAnalytics,
+  JobCreate,
+  JobDetail,
+  ProbeReport,
+  Provider,
+  Run,
+  RunDetail,
+} from "@/types/api";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -52,6 +63,8 @@ export const api = {
       return request<Job[]>(`/jobs${qs ? `?${qs}` : ""}`);
     },
     get: (id: string) => request<JobDetail>(`/jobs/${id}`),
+    analytics: (id: string, bins: number) =>
+      request<JobAnalytics>(`/jobs/${id}/analytics?bins=${bins}`),
     create: (body: JobCreate) => request<Job>("/jobs", json(body)),
     cancel: (id: string) => request<Job>(`/jobs/${id}/cancel`, { method: "POST" }),
     rerun: (id: string) => request<Job>(`/jobs/${id}/rerun`, { method: "POST" }),
@@ -62,6 +75,13 @@ export const api = {
     setExcluded: (id: string, excluded: boolean) =>
       request<Run>(`/runs/${id}`, { method: "PATCH", body: JSON.stringify({ excluded }) }),
   },
+  probes: {
+    get: (envId: string) => request<ProbeReport>(`/envs/${envId}/probes`),
+    run: (envId: string, taskIds?: string[] | null) =>
+      request<ProbeReport>(`/envs/${envId}/probes`, json({ task_ids: taskIds ?? null })),
+  },
+  compare: (jobIds: string[]) =>
+    request<CompareResult>(`/compare?jobs=${encodeURIComponent(jobIds.join(","))}`),
 };
 
 export const keys = {
@@ -71,5 +91,8 @@ export const keys = {
   env: (id: string) => ["envs", id] as const,
   jobs: (params: Record<string, string | number | undefined> = {}) => ["jobs", params] as const,
   job: (id: string) => ["jobs", id] as const,
+  analytics: (id: string, bins: number) => ["jobs", id, "analytics", bins] as const,
   run: (id: string) => ["runs", id] as const,
+  probes: (envId: string) => ["envs", envId, "probes"] as const,
+  compare: (ids: string[]) => ["compare", ...ids] as const,
 };

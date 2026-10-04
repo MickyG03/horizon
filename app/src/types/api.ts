@@ -189,6 +189,117 @@ export interface JobCreate {
   agent_config?: Record<string, unknown>;
 }
 
+/* Analytics (server/services/analytics.py) */
+export interface HistogramBin {
+  lo: number;
+  hi: number;
+  count: number;
+}
+
+export interface Histogram {
+  bins: HistogramBin[];
+  n: number;
+  valid_only: boolean;
+}
+
+export type SignalClass = "learnable" | "saturated" | "impossible" | "flat" | "unknown";
+
+export interface SignalAttempt {
+  run_id: string;
+  attempt: number;
+  status: RunStatus;
+  reward: number | null;
+  cause: string | null;
+  cause_kind: CauseKind | null;
+  excluded: boolean;
+  counted: boolean;
+  advantage: number | null;
+}
+
+export interface TaskSignal {
+  slug: string;
+  task_id: string;
+  args: Record<string, unknown>;
+  attempts_total: number;
+  excluded: number;
+  n: number;
+  mean: number | null;
+  std: number | null;
+  variance: number | null;
+  pass_rate: number | null;
+  signal: SignalClass;
+  signal_strength: number | null;
+  attempts: SignalAttempt[];
+}
+
+export interface SignalSummary {
+  tasks: number;
+  learnable: number;
+  saturated: number;
+  impossible: number;
+  flat: number;
+  unknown: number;
+  zero_gradient_fraction: number | null;
+  mean_variance: number | null;
+  max_group: number;
+}
+
+export interface JobAnalytics {
+  summary: JobSummary;
+  histogram: Histogram;
+  histogram_valid: Histogram;
+  signal: SignalSummary;
+  tasks: TaskSignal[];
+}
+
+/* Grader probes (server/services/probes.py) */
+export interface ProbeOutcome {
+  probe: string;
+  reward: number | null;
+  accepted: boolean;
+  error: string | null;
+  description: string;
+}
+
+export interface ProbeTask {
+  slug: string;
+  task_id: string;
+  score: number | null;
+  accepted: { probe: string; answer: string; reward: number | null; description: string }[];
+  errors: { probe: string; error: string | null }[];
+  probes: ProbeOutcome[];
+  ran_at: string;
+}
+
+export interface ProbeReport {
+  score: number | null;
+  probe_count: number;
+  catalogue: { probe: string; description: string }[];
+  tasks: ProbeTask[];
+}
+
+/* Compare (server/api/analytics.py) */
+export interface CompareCell {
+  pass_rate: number | null;
+  mean: number | null;
+  n: number;
+  signal: SignalClass;
+}
+
+export interface CompareResult {
+  env: { id: string; name: string } | null;
+  columns: {
+    job_id: string;
+    name: string;
+    model: string;
+    agent_type: AgentType;
+    status: JobStatus;
+    summary: Partial<JobSummary>;
+    created_at: string;
+  }[];
+  rows: { slug: string; task_id: string; args: Record<string, unknown>; cells: Record<string, CompareCell> }[];
+}
+
 export interface HorizonEvent<T = unknown> {
   type: string;
   ts: string;

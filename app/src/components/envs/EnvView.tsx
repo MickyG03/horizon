@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { fmtArgs, fmtRelative } from "@/lib/format";
 import { useEnv, useJobs, useReloadEnv } from "@/lib/queries";
 
+import { GraderHealth } from "./GraderHealth";
 import styles from "./EnvView.module.css";
 
 export function EnvView({ id }: { id: string }) {
@@ -60,6 +61,8 @@ export function EnvView({ id }: { id: string }) {
       />
 
       {env.load_error && <pre className={styles.loadError}>{env.load_error}</pre>}
+
+      <GraderHealth env={env} />
 
       <section className={styles.section}>
         <h2 className="t-overline">Tasks</h2>

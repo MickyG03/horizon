@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import envs, events, health, jobs, providers, runs
+from api import analytics, envs, events, health, jobs, probes, providers, runs
 from db.engine import init_db
 from services.runner import runner
 
@@ -39,7 +39,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for router in (health, providers, envs, jobs, runs, events):
+    for router in (health, providers, envs, jobs, runs, events, analytics, probes):
         app.include_router(router.router, prefix="/api")
     return app
 

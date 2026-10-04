@@ -33,6 +33,35 @@ export const useJob = (id: string) =>
 export const useRun = (id: string) =>
   useQuery({ queryKey: keys.run(id), queryFn: () => api.runs.get(id) });
 
+export const useJobAnalytics = (id: string, bins: number, live: boolean) =>
+  useQuery({
+    queryKey: keys.analytics(id, bins),
+    queryFn: () => api.jobs.analytics(id, bins),
+    refetchInterval: live ? 4_000 : false,
+  });
+
+export const useProbes = (envId: string) =>
+  useQuery({ queryKey: keys.probes(envId), queryFn: () => api.probes.get(envId) });
+
+export function useRunProbes(envId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (taskIds?: string[] | null) => api.probes.run(envId, taskIds),
+    onSuccess: (report) => {
+      qc.setQueryData(keys.probes(envId), report);
+      qc.invalidateQueries({ queryKey: keys.env(envId) });
+      qc.invalidateQueries({ queryKey: keys.envs });
+    },
+  });
+}
+
+export const useCompare = (ids: string[]) =>
+  useQuery({
+    queryKey: keys.compare(ids),
+    queryFn: () => api.compare(ids),
+    enabled: ids.length >= 1,
+  });
+
 export function useRegisterEnv() {
   const qc = useQueryClient();
   return useMutation({
