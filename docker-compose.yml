@@ -1,0 +1,32 @@
+# Horizon in two containers. Provider keys come from ./.env (see .env.example).
+#
+#   docker compose up --build
+#
+# Put tasks files under ./envs and register them from the UI as /envs/<name>/tasks.py.
+# The SQLite database persists in ./data.
+
+services:
+  server:
+    build: ./server
+    ports:
+      - "8000:8000"
+    environment:
+      HORIZON_DB_PATH: /data/horizon.db
+      HORIZON_ALLOWED_ORIGINS: http://localhost:3000
+      HUD_TELEMETRY_ENABLED: "false"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data:/data
+      - ./envs:/envs
+
+  app:
+    build:
+      context: ./app
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
