@@ -16,9 +16,10 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: var(--text-4xl);
-  line-height: var(--leading-4xl);
-  letter-spacing: var(--tracking-tight);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-3xl);
   overflow-wrap: anywhere;
 }
 

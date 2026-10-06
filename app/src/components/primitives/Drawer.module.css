@@ -15,10 +15,9 @@
   display: flex;
   flex-direction: column;
   max-width: calc(100vw - var(--space-6));
-  border: var(--border-1) solid var(--border-subtle);
   border-radius: var(--radius-xl);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-4);
+  box-shadow: var(--shadow-4);
+  --surface: color-mix(in srgb, var(--bg-panel) 94%, transparent);
   outline: none;
 }
 
@@ -33,6 +32,8 @@
 
 .title {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
 }

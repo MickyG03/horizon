@@ -9,6 +9,7 @@ import { LaunchDrawer } from "@/components/jobs/LaunchDrawer";
 import { Button } from "@/components/primitives/Button";
 import { EmptyState } from "@/components/primitives/EmptyState";
 import table from "@/components/primitives/Table.module.css";
+import { PageSkeleton } from "@/components/primitives/Skeleton";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { fmtArgs, fmtRelative } from "@/lib/format";
 import { useEnv, useJobs, useReloadEnv } from "@/lib/queries";
@@ -23,7 +24,7 @@ export function EnvView({ id }: { id: string }) {
   const [launch, setLaunch] = useState(false);
 
   if (error) return <p className={styles.error}>{String(error)}</p>;
-  if (!env) return null;
+  if (!env) return <PageSkeleton tiles={0} panels={2} />;
 
   return (
     <div className={styles.page}>
@@ -66,7 +67,7 @@ export function EnvView({ id }: { id: string }) {
 
       <section className={styles.section}>
         <h2 className="t-overline">Tasks</h2>
-        <div className={table.wrap}>
+        <div className={`surface rise ${table.wrap}`}>
           <table className={table.table}>
             <thead>
               <tr>

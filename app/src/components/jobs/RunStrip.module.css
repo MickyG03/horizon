@@ -9,20 +9,27 @@
   --tile-color: var(--status-idle);
 
   display: inline-block;
-  width: 10px;
+  width: 9px;
   height: 14px;
-  border-radius: 2px;
-  background: var(--tile-color);
+  border-radius: 2.5px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tile-color) 70%, white),
+    var(--tile-color) 45%,
+    color-mix(in srgb, var(--tile-color) 80%, black)
+  );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 25%),
-    0 0 6px color-mix(in srgb, var(--tile-color) 45%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 0 7px color-mix(in srgb, var(--tile-color) 50%, transparent);
   transition: background var(--dur-slow) var(--ease-out);
+  animation: lamp-on 500ms var(--ease-out) both;
+  animation-delay: calc(var(--n, 0) * 22ms + 120ms);
 }
 
 .sm .tile {
   width: 7px;
-  height: 10px;
-  border-radius: 1.5px;
+  height: 11px;
+  border-radius: 2px;
 }
 
 .tile[data-pending] {
@@ -32,7 +39,9 @@
 }
 
 .tile[data-running] {
-  animation: blink var(--dur-pulse) var(--ease-in-out) infinite;
+  animation:
+    lamp-on 500ms var(--ease-out) both,
+    blink var(--dur-pulse) var(--ease-in-out) infinite;
 }
 
 .more {
@@ -42,6 +51,23 @@
   color: var(--fg-muted);
 }
 
+@keyframes lamp-on {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.4);
+    filter: brightness(2.2);
+  }
+  60% {
+    opacity: 1;
+    filter: brightness(1.6);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 @keyframes blink {
   0%,
   100% {
@@ -49,5 +75,12 @@
   }
   50% {
     opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .tile[data-running] {
+    animation: none;
   }
 }

@@ -7,8 +7,9 @@
   height: 100vh;
   padding: var(--space-5) var(--space-3);
   border-right: var(--border-1) solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg-canvas) 72%, transparent);
-  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sky-top) 82%, transparent), color-mix(in srgb, var(--ground) 70%, transparent));
+  backdrop-filter: blur(18px) saturate(1.2);
+  z-index: var(--z-sticky);
   flex-shrink: 0;
 }
 
@@ -27,8 +28,9 @@
 
 .wordmark {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-xl);
-  letter-spacing: var(--tracking-snug);
   line-height: 1;
 }
 
@@ -46,17 +48,24 @@
   gap: var(--inline-gap);
   height: var(--control-height);
   border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--fg-on-accent);
+  background: var(--accent-gradient);
+  color: #fff;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   box-shadow: var(--shadow-bevel);
-  transition: background var(--dur-fast) var(--ease-out);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
 }
 
 .primary:hover {
-  background: var(--accent-strong);
-  color: #fff;
+  filter: brightness(1.08);
+  box-shadow: var(--shadow-bevel), var(--glow-accent);
+}
+
+.primary:active {
+  transform: translateY(1px);
 }
 
 .search {
@@ -115,14 +124,36 @@
 }
 
 .item[data-active] {
-  background: var(--bg-active);
   color: var(--fg);
+}
+
+.item[data-active]:hover {
+  background: transparent;
+}
+
+.icon,
+.label {
+  position: relative;
+  z-index: 1;
+}
+
+.item[data-active] .icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 60%, transparent));
+}
+
+/* The active pill slides between items; a small lit bar rides on its left edge. */
+.pill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+    var(--bg-active);
   box-shadow: var(--shadow-inset);
 }
 
-/* A small lit bar on the active item, like an indicator lamp */
-.item[data-active]::before {
-  content: "";
+.lamp {
   position: absolute;
   left: 0;
   top: 9px;

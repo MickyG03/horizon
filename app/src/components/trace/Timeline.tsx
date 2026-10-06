@@ -193,7 +193,7 @@ function Frame({
   return (
     <>
       <span className={styles.dot} data-kind={kind} />
-      <div className={styles.card} data-kind={kind}>
+      <div className={`surface ${styles.card}`} data-kind={kind}>
         <header className={styles.head}>
           <span className={styles.icon}>{icon}</span>
           <span className={styles.title}>{title}</span>

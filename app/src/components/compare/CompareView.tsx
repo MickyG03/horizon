@@ -110,7 +110,7 @@ export function CompareView() {
         />
       ) : (
         compare.data && (
-          <div className={table.wrap}>
+          <div className={`surface rise ${table.wrap}`}>
             <table className={`${table.table} ${styles.matrix}`}>
               <thead>
                 <tr>
@@ -138,7 +138,7 @@ export function CompareView() {
                       const cell = row.cells[c.job_id];
                       return (
                         <td key={c.job_id} className={styles.cell}>
-                          {cell ? (
+                          {cell && cell.pass_rate != null ? (
                             <span
                               className={`${styles.rate} t-num`}
                               style={{ background: cellColor(cell.pass_rate) }}
@@ -147,7 +147,12 @@ export function CompareView() {
                               {fmtPercent(cell.pass_rate)}
                             </span>
                           ) : (
-                            <span className={table.muted}>—</span>
+                            <span
+                              className={table.muted}
+                              title={cell ? "No counted attempts: every run failed on infrastructure" : "Not run"}
+                            >
+                              —
+                            </span>
                           )}
                         </td>
                       );

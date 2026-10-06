@@ -39,6 +39,8 @@
 
 .scoreValue {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-3xl);
   line-height: 1;
   color: var(--fg);

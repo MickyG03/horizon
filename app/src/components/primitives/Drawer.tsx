@@ -45,7 +45,7 @@ export function Drawer({
             </Dialog.Overlay>
             <Dialog.Content asChild forceMount>
               <motion.div
-                className={styles.panel}
+                className={`surface ${styles.panel}`}
                 style={{ width }}
                 initial={{ x: 40, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}

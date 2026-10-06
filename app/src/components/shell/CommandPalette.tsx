@@ -107,7 +107,7 @@ export function CommandPalette({ onNewRun }: { onNewRun: () => void }) {
     >
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
-        <Dialog.Content className={styles.content} onKeyDown={onKeyDown} aria-label="Command palette">
+        <Dialog.Content className={`surface ${styles.content}`} onKeyDown={onKeyDown} aria-label="Command palette">
           <Dialog.Title className="visually-hidden">Command palette</Dialog.Title>
           <Dialog.Description className="visually-hidden">
             Jump to a page, environment or job

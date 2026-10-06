@@ -2,7 +2,7 @@
 
 import { Boxes, Play, RefreshCw, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { LED } from "@/components/horizon/LED";
 import { LaunchDrawer } from "@/components/jobs/LaunchDrawer";
@@ -38,8 +38,8 @@ export function EnvsView() {
         />
       ) : (
         <div className={styles.grid}>
-          {envs?.map((env) => (
-            <EnvCard key={env.id} env={env} onRun={() => setLaunchEnv(env.id)} />
+          {envs?.map((env, i) => (
+            <EnvCard key={env.id} env={env} index={i} onRun={() => setLaunchEnv(env.id)} />
           ))}
         </div>
       )}
@@ -54,13 +54,13 @@ export function EnvsView() {
   );
 }
 
-function EnvCard({ env, onRun }: { env: Env; onRun: () => void }) {
+function EnvCard({ env, onRun, index }: { env: Env; onRun: () => void; index: number }) {
   const reload = useReloadEnv();
   const remove = useDeleteEnv();
   const healthy = !env.load_error;
 
   return (
-    <article className={styles.card}>
+    <article className={`surface surface-interactive rise ${styles.card}`} style={{ "--i": index } as CSSProperties}>
       <header className={styles.head}>
         <LED
           color={healthy ? "var(--status-success)" : "var(--status-error)"}

@@ -3,12 +3,27 @@
   flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
-  padding: var(--space-4) var(--panel-pad);
-  border: var(--border-1) solid var(--border-subtle);
-  border-top: var(--border-2) solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-1);
+  padding: var(--space-4) var(--panel-pad) var(--space-5);
+  overflow: hidden;
+}
+
+/* An accent tile gets a lit filament along its top edge and a faint wash below it. */
+.tile[data-accent]::after {
+  content: "";
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--tile-accent), transparent);
+  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--tile-accent) 60%, transparent);
+}
+
+.tile[data-accent] {
+  background:
+    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--tile-accent) 9%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--sheen), transparent 42%),
+    var(--surface);
 }
 
 .head {
@@ -20,9 +35,10 @@
 
 .value {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-4xl);
   line-height: 1;
-  letter-spacing: var(--tracking-tight);
   color: var(--fg);
 }
 

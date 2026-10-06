@@ -15,17 +15,8 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--panel-pad);
-  border: var(--border-1) solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-1);
-  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
 
-.card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-inset), var(--shadow-2);
-}
 
 .head {
   display: flex;
@@ -35,6 +26,8 @@
 
 .name {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-2xl);
   line-height: 1.1;
   color: var(--fg);

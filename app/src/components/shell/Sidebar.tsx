@@ -1,6 +1,7 @@
 "use client";
 
 import { Boxes, GitCompare, LayoutDashboard, ListChecks, Plus, Search, Settings } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -61,8 +62,17 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
               data-active={active || undefined}
               aria-current={active ? "page" : undefined}
             >
-              <Icon size={16} strokeWidth={1.9} aria-hidden />
-              <span>{label}</span>
+              {active && (
+                <motion.span
+                  layoutId="nav-active"
+                  className={styles.pill}
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                >
+                  <span className={styles.lamp} />
+                </motion.span>
+              )}
+              <Icon size={16} strokeWidth={1.9} aria-hidden className={styles.icon} />
+              <span className={styles.label}>{label}</span>
             </Link>
           );
         })}

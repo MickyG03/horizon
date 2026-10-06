@@ -99,6 +99,26 @@
   --grid-line-strong: rgb(255 255 255 / 11%);
   --horizon-glow-a: rgb(255 196 120 / 20%);
   --horizon-glow-b: rgb(110 86 255 / 14%);
+
+  /* Scene: dusk */
+  --sky-top: #08080b;
+  --sky-mid: #0f0d16;
+  --sky-low: #1d1424;
+  --sun-core: rgb(255 196 128 / 70%);
+  --sun-edge: rgb(240 98 92 / 28%);
+  --horizon-line: rgb(255 214 170 / 55%);
+  --ground: #0a090d;
+  --ground-line: rgb(170 150 255 / 14%);
+
+  /* Surfaces: glassy panels with a lit edge */
+  --surface: rgb(20 20 24 / 78%);
+  --surface-raised: rgb(30 30 36 / 82%);
+  --edge-hi: rgb(255 255 255 / 14%);
+  --edge-lo: rgb(255 255 255 / 3%);
+  --sheen: rgb(255 255 255 / 3.5%);
+
+  --accent-gradient: linear-gradient(180deg, #9d8fff 0%, #6e56ff 100%);
+  --reward-gradient: linear-gradient(90deg, var(--coral-400), var(--amber-400) 50%, var(--lime-400));
 }
 
 :root[data-theme="light"] {
@@ -145,4 +165,23 @@
   --grid-line-strong: rgb(20 20 24 / 13%);
   --horizon-glow-a: rgb(255 170 90 / 38%);
   --horizon-glow-b: rgb(127 154 178 / 30%);
+
+  /* Scene: dawn */
+  --sky-top: #cfdbe6;
+  --sky-mid: #e3e9ee;
+  --sky-low: #f6e2cf;
+  --sun-core: rgb(255 176 102 / 75%);
+  --sun-edge: rgb(255 140 110 / 30%);
+  --horizon-line: rgb(200 120 60 / 45%);
+  --ground: #e9edf0;
+  --ground-line: rgb(60 70 100 / 12%);
+
+  --surface: rgb(251 250 247 / 80%);
+  --surface-raised: rgb(255 255 255 / 90%);
+  --edge-hi: rgb(255 255 255 / 95%);
+  --edge-lo: rgb(20 20 24 / 6%);
+  --sheen: rgb(255 255 255 / 40%);
+
+  --accent-gradient: linear-gradient(180deg, #8471ff 0%, #5a44d9 100%);
+  --reward-gradient: linear-gradient(90deg, var(--coral-500), var(--amber-500) 50%, var(--lime-600));
 }

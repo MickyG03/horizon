@@ -8,6 +8,7 @@ import { useState } from "react";
 import { LED } from "@/components/horizon/LED";
 import { Badge } from "@/components/primitives/Badge";
 import { Button } from "@/components/primitives/Button";
+import { PageSkeleton } from "@/components/primitives/Skeleton";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { fmtDateTime, fmtRelative } from "@/lib/format";
 import { useCancelJob, useDeleteJob, useJob, useJobAnalytics, useRerunJob } from "@/lib/queries";
@@ -38,7 +39,7 @@ export function JobView({ id }: { id: string }) {
   if (error) {
     return <p className={styles.error}>{String(error)}</p>;
   }
-  if (!job) return null;
+  if (!job) return <PageSkeleton tiles={6} panels={2} />;
 
   return (
     <div className={styles.page}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 
 import { DUR, EASE } from "@theme/motion";
 
@@ -15,11 +15,16 @@ type StatTileProps = {
   hint?: ReactNode;
   accent?: string;
   lamp?: ReactNode;
+  index?: number;
 };
 
-export function StatTile({ label, value, numeric, hint, accent, lamp }: StatTileProps) {
+export function StatTile({ label, value, numeric, hint, accent, lamp, index = 0 }: StatTileProps) {
   return (
-    <div className={styles.tile} style={accent ? { borderTopColor: accent } : undefined}>
+    <div
+      className={`surface rise ${styles.tile}`}
+      data-accent={accent ? "" : undefined}
+      style={{ "--i": index, "--tile-accent": accent ?? "transparent" } as CSSProperties}
+    >
       <div className={styles.head}>
         <span className="t-overline">{label}</span>
         {lamp}
@@ -32,11 +37,11 @@ export function StatTile({ label, value, numeric, hint, accent, lamp }: StatTile
   );
 }
 
-function CountUp({ value, format }: { value: number; format: (v: number) => string }) {
-  const mv = useMotionValue(value);
+export function CountUp({ value, format }: { value: number; format: (v: number) => string }) {
+  const mv = useMotionValue(0);
   const text = useTransform(mv, (v) => format(v));
   useEffect(() => {
-    const controls = animate(mv, value, { duration: DUR.slow, ease: EASE.out });
+    const controls = animate(mv, value, { duration: DUR.glacial, ease: EASE.out });
     return () => controls.stop();
   }, [value, mv]);
   return <motion.span>{text}</motion.span>;

@@ -8,6 +8,7 @@
 @import "./shadows.css";
 @import "./motion.css";
 @import "./layers.css";
+@import "./surfaces.css";
 
 /* Reset */
 *,
@@ -22,6 +23,14 @@ html {
   height: 100%;
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {

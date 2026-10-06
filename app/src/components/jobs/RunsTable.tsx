@@ -29,7 +29,7 @@ export function RunsTable({ runs }: { runs: Run[] }) {
   const groups = useMemo(() => groupRuns(runs), [runs]);
 
   return (
-    <div className={table.wrap}>
+    <div className={`surface rise ${table.wrap}`}>
       <table className={table.table}>
         <thead>
           <tr>

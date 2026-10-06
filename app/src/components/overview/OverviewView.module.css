@@ -4,24 +4,83 @@
   gap: var(--section-gap);
 }
 
+/* Hero: words on the left, the gauge rising like a sun on the right ------------------------- */
+
 .hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-10);
+  min-height: calc(36vh - var(--page-margin));
+  padding-top: var(--space-6);
 }
 
-.period {
-  color: var(--status-warn);
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  font-size: clamp(2.5rem, 4.6vw, 4.25rem);
+  line-height: 1.02;
+}
+
+.title em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--fg) 0%, var(--amber-300) 55%, var(--coral-300) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.08em;
+}
+
+:global([data-theme="light"]) .title em {
+  background-image: linear-gradient(90deg, var(--fg) 0%, var(--amber-600) 55%, var(--coral-500) 100%);
 }
 
 .lede {
-  max-width: 56ch;
+  max-width: 52ch;
   font-size: var(--text-lg);
   line-height: var(--leading-lg);
   color: var(--fg-muted);
 }
+
+.heroActions {
+  display: flex;
+  gap: var(--inline-gap);
+  margin-top: var(--space-2);
+}
+
+.heroGauge {
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-6);
+}
+
+@media (max-width: 1000px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .heroGauge {
+    justify-content: flex-start;
+    padding: 0;
+  }
+}
+
+/* Body ------------------------------------------------------------------------------------- */
 
 .tiles {
   display: grid;
@@ -31,7 +90,7 @@
 
 .columns {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
   gap: var(--grid-gap);
   align-items: start;
 }
@@ -61,10 +120,89 @@
   gap: 2px;
   font-size: var(--text-xs);
   color: var(--accent);
+  transition: gap var(--dur-fast) var(--ease-out);
+}
+
+.more:hover {
+  gap: 6px;
 }
 
 .feed {
   min-width: 0;
+  margin-top: calc(var(--leading-2xs) + var(--space-3));
+}
+
+.conn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--fg-faint);
+}
+
+.conn[data-on] {
+  color: var(--status-success);
+}
+
+/* Empty feed: a radar quietly sweeping for signal */
+.radar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 220px;
+  overflow: hidden;
+}
+
+.ring,
+.core {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+}
+
+.ring {
+  width: 160px;
+  height: 160px;
+  border: 1px solid color-mix(in srgb, var(--status-success) 50%, transparent);
+  animation: ping 3s var(--ease-out) infinite;
+  opacity: 0;
+}
+
+.core {
+  width: 8px;
+  height: 8px;
+  background: var(--status-success);
+  box-shadow: var(--glow-success);
+}
+
+.radarText {
+  position: absolute;
+  bottom: var(--space-2);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+@keyframes ping {
+  0% {
+    transform: translate(-50%, -50%) scale(0.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation: none;
+  }
 }
 
 .feedList {
@@ -73,12 +211,6 @@
   flex-direction: column;
   max-height: 420px;
   overflow-y: auto;
-}
-
-.feedEmpty {
-  padding: var(--space-4) 0;
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
 }
 
 .feedItem {

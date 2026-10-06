@@ -8,6 +8,7 @@ import { LED } from "@/components/horizon/LED";
 import { Panel } from "@/components/horizon/Panel";
 import { Badge } from "@/components/primitives/Badge";
 import { Button } from "@/components/primitives/Button";
+import { PageSkeleton } from "@/components/primitives/Skeleton";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { fmtArgs, fmtDuration, fmtReward, fmtTokens, secondsBetween, shortId } from "@/lib/format";
 import { useRun } from "@/lib/queries";
@@ -26,7 +27,7 @@ export function RunView({ id }: { id: string }) {
   const [raw, setRaw] = useState(false);
 
   if (error) return <p className={styles.error}>{String(error)}</p>;
-  if (!data || !run) return null;
+  if (!data || !run) return <PageSkeleton tiles={0} panels={3} />;
 
   const duration = secondsBetween(run.started_at, run.ended_at);
   const tokens = (run.usage.prompt_tokens ?? 0) + (run.usage.completion_tokens ?? 0);

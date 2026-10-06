@@ -3,11 +3,23 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4) var(--panel-pad);
-  border: var(--border-1) solid var(--border-subtle);
-  border-left: 3px solid var(--fg-faint);
-  border-radius: var(--radius-lg);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-1);
+}
+
+.card {
+  --kind: var(--fg-faint);
+  overflow: hidden;
+}
+
+/* a lit strip down the left edge, coloured by whose fault it was */
+.card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--kind);
+  box-shadow: 0 0 14px 1px color-mix(in srgb, var(--kind) 60%, transparent);
 }
 
 .card > :first-child {
@@ -15,27 +27,27 @@
 }
 
 .card[data-kind="ok"] {
-  border-left-color: var(--cause-ok);
+  --kind: var(--cause-ok);
 }
 
 .card[data-kind="agent"] {
-  border-left-color: var(--cause-agent);
+  --kind: var(--cause-agent);
 }
 
 .card[data-kind="infra"] {
-  border-left-color: var(--cause-infra);
+  --kind: var(--cause-infra);
 }
 
 .card[data-kind="env"] {
-  border-left-color: var(--cause-env);
+  --kind: var(--cause-env);
 }
 
 .card[data-kind="grader"] {
-  border-left-color: var(--cause-grader);
+  --kind: var(--cause-grader);
 }
 
 .card[data-kind="running"] {
-  border-left-color: var(--status-running);
+  --kind: var(--status-running);
 }
 
 .text {
@@ -55,6 +67,8 @@
 
 .title {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
 }

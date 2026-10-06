@@ -66,23 +66,28 @@
 }
 
 .card {
-  border: var(--border-1) solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-1);
   overflow: hidden;
 }
 
+/* Each kind tints the step header with its colour so the trajectory reads at a glance. */
+.card {
+  --tint: var(--fg-faint);
+}
+
+.card[data-kind="user"] {
+  --tint: var(--status-info);
+}
+
 .card[data-kind="agent"] {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  --tint: var(--accent);
 }
 
 .card[data-kind="error"] {
-  border-color: color-mix(in srgb, var(--status-error) 40%, var(--border-subtle));
+  --tint: var(--status-error);
 }
 
 .card[data-kind="grade"] {
-  border-color: color-mix(in srgb, var(--status-success) 30%, var(--border-subtle));
+  --tint: var(--status-success);
 }
 
 .head {
@@ -91,13 +96,18 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm);
-  background: color-mix(in srgb, var(--bg-inset) 35%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tint) 12%, transparent), transparent 60%);
+  border-bottom: var(--border-1) solid var(--border-subtle);
+}
+
+.head:last-child {
+  border-bottom: 0;
 }
 
 .icon {
   display: grid;
   place-items: center;
-  color: var(--fg-muted);
+  color: var(--tint);
 }
 
 .title {

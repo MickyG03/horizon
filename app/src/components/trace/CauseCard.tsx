@@ -19,7 +19,7 @@ export function CauseCard({ run }: { run: Run }) {
 
   if (live) {
     return (
-      <div className={styles.card} data-kind="running">
+      <div className={`surface rise ${styles.card}`} data-kind="running">
         <LED color="var(--status-running)" pulse size={10} />
         <div>
           <div className={styles.title}>Running</div>
@@ -34,7 +34,7 @@ export function CauseCard({ run }: { run: Run }) {
   const counts = (cause.kind === "ok" || cause.kind === "agent") && !run.excluded;
 
   return (
-    <div className={styles.card} data-kind={cause.kind}>
+    <div className={`surface rise ${styles.card}`} data-kind={cause.kind}>
       <LED color={color} size={10} />
       <div className={styles.text}>
         <div className={styles.titleRow}>

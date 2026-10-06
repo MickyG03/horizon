@@ -1,0 +1,102 @@
+/* Shared surface treatments, used as global classes alongside component modules.
+
+   .surface              glass slab: translucent fill, backdrop blur, a lit top edge that fades
+                         down the sides (a 1px gradient border drawn with a masked pseudo-element)
+   .surface-interactive  lifts and brightens its edge on hover
+   .rise                 entrance animation; stagger with style={{ "--i": n }}
+   .shimmer              skeleton placeholder */
+
+.surface {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, var(--sheen), transparent 42%),
+    var(--surface);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: var(--shadow-2);
+  isolation: isolate;
+}
+
+.surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--edge-hi), var(--edge-lo) 55%, var(--edge-lo));
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.surface-interactive {
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.surface-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
+}
+
+.surface-interactive:hover::before {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 55%, var(--edge-hi)),
+    var(--edge-lo) 60%
+  );
+}
+
+.rise {
+  animation: rise var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.shimmer {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--fg) 7%, transparent) 50%,
+      transparent 100%
+    )
+    0 0 / 200% 100%,
+    color-mix(in srgb, var(--fg) 5%, transparent);
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .shimmer {
+    animation: none;
+  }
+}

@@ -13,12 +13,11 @@
   z-index: var(--z-modal);
   width: min(560px, calc(100vw - var(--space-8)));
   transform: translateX(-50%);
-  border: var(--border-1) solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-inset), var(--shadow-4);
   overflow: hidden;
-  animation: rise var(--dur-base) var(--ease-out);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-4);
+  --surface: color-mix(in srgb, var(--bg-panel) 92%, transparent);
+  animation: palette-in var(--dur-base) var(--ease-out);
   outline: none;
 }
 
@@ -111,9 +110,9 @@
   }
 }
 
-@keyframes rise {
+@keyframes palette-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 8px);
+    transform: translate(-50%, 10px) scale(0.98);
   }
 }

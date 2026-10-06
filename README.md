@@ -5,7 +5,7 @@ any model from the browser, watch every step stream in, and get an honest read o
 which runs failed because the model was wrong, which because the grader is weak, and which because
 a provider returned a 503.
 
-![Job detail: a run where every attempt was rate limited. Horizon reports no valid reward and nine infrastructure failures instead of 0%.](docs/screenshots/job-rate-limited.jpg)
+![Overview: the valid-reward gauge rising over the horizon, with infra failure rate, jobs, runs and grader health below.](docs/screenshots/overview.jpg)
 
 ## Why
 
@@ -36,7 +36,9 @@ found, timeout, environment error, grader error, ran out of steps, malformed too
 answer, no answer. Causes that aren't the model's doing are set aside, and every job shows the
 **valid reward** next to the **raw** one hud.ai would report.
 
-![Run detail: the cause card, the step timeline with collapsible reasoning, and the duration waterfall.](docs/screenshots/trace.jpg)
+![Job detail: every attempt was rate limited. The gauge stays empty and says why, where hud.ai would show 0%.](docs/screenshots/job-rate-limited.jpg)
+
+![Job detail: valid reward gauge, score distribution and triage breakdown.](docs/screenshots/job.jpg)
 
 **Probes graders for reward hacking.** Ten junk answers (an empty reply, a refusal, the prompt
 echoed back, every digit at once, a bare "yes", filler, a JSON blob claiming success, a hedge
@@ -111,8 +113,8 @@ server/            FastAPI, Python 3.12
   db/              SQLModel tables: envs, jobs, runs, steps, probe_results
 app/               Next.js 16, TypeScript, CSS Modules. No Tailwind.
   theme/           every design token: colors (dusk/dawn), type scale, spacing, borders,
-                   shadows, motion, layers
-  src/components/  shell, horizon (backdrop, LED, stat tile, knurled slider), charts,
+                   shadows, motion, layers, surfaces
+  src/components/  shell, horizon (backdrop, gauge, LED, stat tile, knurled slider), charts,
                    jobs, trace, envs, compare, settings
 envs/              your environments (empty by default; register any path)
 ```
@@ -145,13 +147,13 @@ CI runs both halves and builds the Docker images.
 ## Design
 
 The theme is a single set of CSS custom properties under `app/theme/`. Dark ("dusk") is the
-default; "dawn" is a light theme behind the toggle. Instrument Serif for display type, Inter for UI,
-JetBrains Mono for identifiers. Panels have a lit top edge, inputs are recessed wells, status is
-shown by lamps that glow, and sliders have a ridged thumb. Behind every page sits a horizon: a faint
-sky grid, a glowing line, and a ground plane drawn in perspective that parallaxes with the scroll.
-Motion respects `prefers-reduced-motion`.
-
-![Overview in the dawn theme.](docs/screenshots/overview-light.jpg)
+default; "dawn" is a light theme behind the toggle. One sans family (Inter) for everything, heavier
+and tighter for headings, with JetBrains Mono for identifiers and numbers in tables. Panels are
+glass with a lit top edge, inputs are recessed wells, status is shown by lamps that glow, and
+sliders have a ridged thumb. Behind every page sits a horizon: a quiet sky, a soft sun resting on a
+single lit line, and a flat field of fine gridlines that fades out toward the edges. The reward
+gauge is that sun: a half-dial that fills from coral to lime. Pages fade in, lists stagger, run
+lamps switch on left to right, and numbers count up; all of it respects `prefers-reduced-motion`.
 
 ## Roadmap
 

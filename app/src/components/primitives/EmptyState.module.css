@@ -7,6 +7,8 @@
   text-align: center;
   border: var(--border-1) dashed var(--border-default);
   border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  backdrop-filter: blur(10px);
   color: var(--fg-muted);
 }
 
@@ -23,6 +25,8 @@
 
 .title {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
   color: var(--fg);

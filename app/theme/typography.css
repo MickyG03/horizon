@@ -37,29 +37,29 @@
   --tracking-caps: 0.08em;
 }
 
-/* Display: serif, used for page titles and hero numbers */
+/* Display: the sans at display weight, for page titles and hero numbers */
 .t-display-1 {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-5xl);
   line-height: var(--leading-5xl);
-  font-weight: var(--weight-regular);
-  letter-spacing: var(--tracking-tight);
 }
 
 .t-display-2 {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-4xl);
   line-height: var(--leading-4xl);
-  font-weight: var(--weight-regular);
-  letter-spacing: var(--tracking-tight);
 }
 
 .t-display-3 {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   font-size: var(--text-3xl);
   line-height: var(--leading-3xl);
-  font-weight: var(--weight-regular);
-  letter-spacing: var(--tracking-snug);
 }
 
 /* UI: sans */
