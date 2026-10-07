@@ -29,9 +29,9 @@
   height: var(--control-height);
   padding: 0 var(--control-pad-x);
   border-radius: var(--radius-sm);
-  border: var(--border-1) solid var(--border-subtle);
-  background: var(--bg-inset);
-  box-shadow: var(--shadow-well);
+  border: var(--border-1) solid var(--border-default);
+  background: var(--control-bg);
+  box-shadow: var(--shadow-1);
   color: var(--fg);
   font-size: var(--text-sm);
   transition: border-color var(--dur-fast) var(--ease-out);
@@ -41,9 +41,14 @@
   color: var(--fg-faint);
 }
 
+.control:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
 .control:focus-visible {
   border-color: var(--accent);
-  box-shadow: var(--shadow-well), var(--ring-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-radius: var(--radius-sm);
 }
 
 .control:disabled {

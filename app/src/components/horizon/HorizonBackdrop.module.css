@@ -1,5 +1,6 @@
 .backdrop {
   --horizon-y: 36vh;
+  --sun-x: 70%;
   --cell: 56px;
 
   position: fixed;
@@ -7,28 +8,34 @@
   z-index: var(--z-backdrop);
   overflow: hidden;
   pointer-events: none;
-  background: var(--ground);
+
+  /* Sky and ground are one gradient, so there is no seam at the horizon; the glow is a radial
+     on the same layer, so it can't be clipped by a box edge. */
+  background:
+    radial-gradient(
+      42% 26% at var(--sun-x) var(--horizon-y),
+      var(--horizon-glow-a) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      90% 30% at 50% var(--horizon-y),
+      var(--horizon-glow-b) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--sky-top) 0%,
+      var(--sky-mid) calc(var(--horizon-y) - 12vh),
+      var(--sky-low) var(--horizon-y),
+      var(--ground) calc(var(--horizon-y) + 22vh),
+      var(--ground) 100%
+    );
 }
 
-/* A quiet sky that warms just above the horizon */
-.sky {
-  position: absolute;
-  inset: 0 0 auto;
-  height: calc(var(--horizon-y) + 2px);
-  background: linear-gradient(
-    to bottom,
-    var(--sky-top) 0%,
-    var(--sky-mid) 60%,
-    var(--sky-low) 100%
-  );
-  transform: translateY(var(--parallax, 0px));
-}
-
-/* Flat gridlines: one even field, brightest near the horizon, dissolving toward the edges.
-   No perspective, no depth: just a ruled sheet of paper under the content. */
+/* Flat gridlines: one even field, brightest near the horizon, dissolving toward the edges. */
 .grid {
   position: absolute;
-  inset: -2px;
+  inset: 0;
   background-image:
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
@@ -37,43 +44,30 @@
   mask-image: radial-gradient(
     70% 60% at 62% var(--horizon-y),
     black 0%,
-    rgb(0 0 0 / 55%) 45%,
+    rgb(0 0 0 / 50%) 45%,
     transparent 85%
   );
-  transform: translateY(var(--parallax, 0px));
 }
 
-/* Sun: a soft disc clipped by the horizon, right of centre so it never sits behind a title. */
+/* Sun: a soft disc whose lower half is hidden below the horizon. A pure radial gradient with no
+   blur filter, so the edge of its box never shows. */
 .sun {
   position: absolute;
-  left: 68%;
+  left: var(--sun-x);
   top: var(--horizon-y);
-  width: min(48vh, 480px);
+  width: min(46vh, 460px);
   aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translate(-50%, -50%) translateY(var(--parallax, 0px));
+  transform: translate(-50%, -50%);
   clip-path: inset(0 0 50% 0);
   background: radial-gradient(
-    circle,
+    closest-side,
     var(--sun-core) 0%,
-    color-mix(in srgb, var(--sun-core) 55%, var(--sun-edge)) 30%,
-    var(--sun-edge) 50%,
-    transparent 70%
+    color-mix(in srgb, var(--sun-core) 50%, var(--sun-edge)) 40%,
+    var(--sun-edge) 65%,
+    transparent 100%
   );
-  filter: blur(8px);
-  opacity: 0.5;
+  opacity: 0.55;
   animation: breathe 10s var(--ease-in-out) infinite alternate;
-}
-
-.haze {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: var(--horizon-y);
-  height: 30vh;
-  transform: translateY(-50%) translateY(var(--parallax, 0px));
-  background: radial-gradient(40% 28% at 68% 50%, var(--horizon-glow-a), transparent 70%);
-  filter: blur(24px);
 }
 
 /* The one strong line on the page */
@@ -83,36 +77,22 @@
   right: 0;
   top: var(--horizon-y);
   height: 1px;
-  transform: translateY(var(--parallax, 0px));
   background: linear-gradient(
     to right,
     transparent 4%,
     var(--grid-line-strong) 25%,
-    var(--horizon-line) 68%,
+    var(--horizon-line) var(--sun-x),
     var(--grid-line-strong) 88%,
     transparent 98%
   );
 }
 
-.grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.04;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
-
-:global([data-theme="light"]) .grain {
-  opacity: 0.06;
-  mix-blend-mode: multiply;
-}
-
 @keyframes breathe {
   from {
-    opacity: 0.4;
+    opacity: 0.45;
   }
   to {
-    opacity: 0.58;
+    opacity: 0.62;
   }
 }
 

@@ -26,6 +26,7 @@ export function SummaryTiles({ job }: { job: Job }) {
           ghost={raw}
           label="Valid reward"
           size={300}
+          mosaic={running ? "live" : "still"}
           caption={
             valid == null
               ? running

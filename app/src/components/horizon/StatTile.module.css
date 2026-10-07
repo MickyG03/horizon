@@ -7,23 +7,17 @@
   overflow: hidden;
 }
 
-/* An accent tile gets a lit filament along its top edge and a faint wash below it. */
+/* An accent tile gets a thin lit line just inside its top edge. */
 .tile[data-accent]::after {
   content: "";
   position: absolute;
-  left: var(--space-4);
-  right: var(--space-4);
+  left: var(--space-5);
+  right: var(--space-5);
   top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--tile-accent), transparent);
-  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--tile-accent) 60%, transparent);
-}
-
-.tile[data-accent] {
-  background:
-    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--tile-accent) 9%, transparent), transparent 70%),
-    linear-gradient(180deg, var(--sheen), transparent 42%),
-    var(--surface);
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--tile-accent);
+  box-shadow: 0 0 var(--filament-blur) color-mix(in srgb, var(--tile-accent) 55%, transparent);
 }
 
 .head {

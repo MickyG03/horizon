@@ -26,15 +26,15 @@
 }
 
 :root[data-theme="light"] {
-  --shadow-1: 0 1px 2px rgb(20 20 24 / 10%);
-  --shadow-2: 0 2px 6px rgb(20 20 24 / 10%), 0 1px 2px rgb(20 20 24 / 6%);
-  --shadow-3: 0 8px 24px rgb(20 20 24 / 12%), 0 2px 6px rgb(20 20 24 / 8%);
-  --shadow-4: 0 24px 64px rgb(20 20 24 / 18%), 0 8px 24px rgb(20 20 24 / 10%);
+  --shadow-1: 0 1px 2px rgb(20 20 24 / 5%);
+  --shadow-2: 0 1px 2px rgb(20 20 24 / 4%), 0 4px 14px rgb(20 20 24 / 4%);
+  --shadow-3: 0 2px 4px rgb(20 20 24 / 5%), 0 10px 28px rgb(20 20 24 / 7%);
+  --shadow-4: 0 24px 64px rgb(20 20 24 / 14%), 0 8px 24px rgb(20 20 24 / 8%);
 
-  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 80%), inset 0 -1px 0 rgb(20 20 24 / 8%);
-  --shadow-well: inset 0 2px 6px rgb(20 20 24 / 14%), inset 0 1px 0 rgb(20 20 24 / 8%);
-  --shadow-bevel: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -1px 0 rgb(20 20 24 / 12%),
-    0 1px 2px rgb(20 20 24 / 12%);
+  /* Daylight is flat: no embossing, just hairlines and soft lift */
+  --shadow-inset: 0 0 0 0 transparent;
+  --shadow-well: inset 0 0 0 1px rgb(20 20 24 / 9%);
+  --shadow-bevel: 0 1px 2px rgb(20 20 24 / 8%);
 
   --glow-success: 0 0 0 1px rgb(111 181 44 / 35%), 0 0 10px rgb(111 181 44 / 45%);
   --glow-error: 0 0 0 1px rgb(217 56 61 / 35%), 0 0 10px rgb(217 56 61 / 45%);

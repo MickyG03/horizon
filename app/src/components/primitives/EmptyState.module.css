@@ -1,4 +1,6 @@
 .empty {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,4 +42,17 @@
 
 .action {
   margin-top: var(--space-2);
+}
+
+.mosaic {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 56px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.empty > :not(.mosaic) {
+  position: relative;
 }

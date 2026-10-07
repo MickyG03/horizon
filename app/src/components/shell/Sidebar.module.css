@@ -21,11 +21,6 @@
   color: var(--fg);
 }
 
-.mark {
-  color: var(--status-warn);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--status-warn) 50%, transparent));
-}
-
 .wordmark {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
@@ -240,5 +235,52 @@
     flex-direction: column;
     padding-left: 0;
     padding-right: 0;
+  }
+}
+
+/* Pixel sparkle on hover: a checkerboard of light cells, stepped so it reads as pixels */
+.primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: conic-gradient(
+      rgb(255 255 255 / 26%) 25%,
+      transparent 0 50%,
+      rgb(255 255 255 / 26%) 0 75%,
+      transparent 0
+    )
+    0 0 / 4px 4px;
+  mask-image: linear-gradient(100deg, transparent 20%, black 45%, black 55%, transparent 80%);
+  mask-size: 300% 100%;
+  mask-position: 120% 0;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.primary:hover::after {
+  opacity: 1;
+  animation: pixel-sweep 900ms steps(9) infinite;
+}
+
+@keyframes pixel-sweep {
+  from {
+    mask-position: 120% 0;
+  }
+  to {
+    mask-position: -20% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary:hover::after {
+    animation: none;
+    mask-position: 50% 0;
   }
 }

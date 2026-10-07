@@ -9,10 +9,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-6) var(--space-5) var(--space-5);
-  background:
-    radial-gradient(70% 55% at 50% 70%, color-mix(in srgb, var(--sun-core) 12%, transparent), transparent 70%),
-    linear-gradient(180deg, var(--sheen), transparent 42%),
-    var(--surface);
+  overflow: hidden;
 }
 
 .tiles {

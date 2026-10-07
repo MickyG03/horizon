@@ -41,7 +41,7 @@ export function CountUp({ value, format }: { value: number; format: (v: number) 
   const mv = useMotionValue(0);
   const text = useTransform(mv, (v) => format(v));
   useEffect(() => {
-    const controls = animate(mv, value, { duration: DUR.glacial, ease: EASE.out });
+    const controls = animate(mv, value, { duration: DUR.slow * 1.5, ease: EASE.out });
     return () => controls.stop();
   }, [value, mv]);
   return <motion.span>{text}</motion.span>;

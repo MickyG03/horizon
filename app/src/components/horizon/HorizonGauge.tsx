@@ -5,6 +5,7 @@ import { useEffect, useId, type ReactNode } from "react";
 
 import { DUR, EASE } from "@theme/motion";
 
+import { Mosaic } from "./Mosaic";
 import { CountUp } from "./StatTile";
 import styles from "./HorizonGauge.module.css";
 
@@ -16,6 +17,8 @@ type HorizonGaugeProps = {
   label: ReactNode;
   caption?: ReactNode;
   size?: number;
+  /* A pixel sun rising behind the dial: shimmering ("live"), settled ("still"), or none. */
+  mosaic?: "live" | "still" | false;
 };
 
 const START = Math.PI; // left end of the arc
@@ -38,7 +41,14 @@ const round = (v: number) => Math.round(v * 100) / 100;
 
 /* A half-dial that reads like a sun on the horizon: the arc fills from coral through amber to
    lime as the reward rises. Ticks every 10%, a needle-free design with the number in the middle. */
-export function HorizonGauge({ value, ghost, label, caption, size = 260 }: HorizonGaugeProps) {
+export function HorizonGauge({
+  value,
+  ghost,
+  label,
+  caption,
+  size = 260,
+  mosaic = false,
+}: HorizonGaugeProps) {
   const id = useId().replace(/:/g, "");
   const v = value == null ? 0 : Math.max(0, Math.min(1, value));
   const ticks = Array.from({ length: 11 }, (_, i) => i / 10);
@@ -55,6 +65,19 @@ export function HorizonGauge({ value, ghost, label, caption, size = 260 }: Horiz
   return (
     <div className={styles.gauge} style={{ width: size }}>
       <div className={styles.dial}>
+      {mosaic && (
+        <div className={styles.mosaic}>
+          <Mosaic
+            shape="ring"
+            tone="warm"
+            cell={4}
+            gap={2}
+            intensity={0.75}
+            sweep={v}
+            live={mosaic === "live"}
+          />
+        </div>
+      )}
       <svg viewBox="0 0 200 112" className={styles.svg} role="img" aria-label={`${label}`}>
         <defs>
           <linearGradient id={`g-${id}`} x1="0" x2="1" y1="0" y2="0">

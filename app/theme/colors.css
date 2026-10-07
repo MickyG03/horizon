@@ -111,12 +111,17 @@
   --ground-line: rgb(170 150 255 / 14%);
 
   /* Surfaces: glassy panels with a lit edge */
-  --surface: rgb(20 20 24 / 78%);
-  --surface-raised: rgb(30 30 36 / 82%);
+  --surface: rgb(19 19 23 / 92%);
+  --surface-raised: rgb(30 30 36 / 96%);
   --edge-hi: rgb(255 255 255 / 14%);
   --edge-lo: rgb(255 255 255 / 3%);
   --sheen: rgb(255 255 255 / 3.5%);
 
+  --control-bg: var(--ink-950);
+  --filament-blur: 10px;
+  --mosaic-warm: #ffb27a;
+  --mosaic-cool: #8b7bff;
+  --score-gradient: linear-gradient(90deg, var(--amber-300), var(--coral-300));
   --accent-gradient: linear-gradient(180deg, #9d8fff 0%, #6e56ff 100%);
   --reward-gradient: linear-gradient(90deg, var(--coral-400), var(--amber-400) 50%, var(--lime-400));
 }
@@ -124,10 +129,10 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-canvas: var(--sky-100);
-  --bg-panel: var(--paper-50);
+  --bg-canvas: #f3f5f7;
+  --bg-panel: #ffffff;
   --bg-panel-raised: #ffffff;
-  --bg-inset: var(--sky-200);
+  --bg-inset: #eef1f4;
   --bg-hover: rgb(20 20 24 / 4%);
   --bg-active: rgb(20 20 24 / 8%);
   --bg-scrim: rgb(20 20 24 / 40%);
@@ -163,24 +168,30 @@
 
   --grid-line: rgb(20 20 24 / 6%);
   --grid-line-strong: rgb(20 20 24 / 13%);
-  --horizon-glow-a: rgb(255 170 90 / 38%);
-  --horizon-glow-b: rgb(127 154 178 / 30%);
+  --horizon-glow-a: rgb(255 176 112 / 26%);
+  --horizon-glow-b: rgb(150 170 200 / 16%);
 
   /* Scene: dawn */
-  --sky-top: #cfdbe6;
-  --sky-mid: #e3e9ee;
-  --sky-low: #f6e2cf;
-  --sun-core: rgb(255 176 102 / 75%);
-  --sun-edge: rgb(255 140 110 / 30%);
-  --horizon-line: rgb(200 120 60 / 45%);
-  --ground: #e9edf0;
+  --sky-top: #e4ebf1;
+  --sky-mid: #edf1f4;
+  --sky-low: #f6efe8;
+  --sun-core: rgb(255 184 120 / 60%);
+  --sun-edge: rgb(255 160 130 / 18%);
+  --horizon-line: rgb(214 140 90 / 40%);
+  --ground: #f3f5f7;
   --ground-line: rgb(60 70 100 / 12%);
 
-  --surface: rgb(251 250 247 / 80%);
-  --surface-raised: rgb(255 255 255 / 90%);
-  --edge-hi: rgb(255 255 255 / 95%);
-  --edge-lo: rgb(20 20 24 / 6%);
-  --sheen: rgb(255 255 255 / 40%);
+  --surface: rgb(255 255 255 / 94%);
+  --surface-raised: #ffffff;
+  --edge-hi: rgb(20 20 24 / 9%);
+  --edge-lo: rgb(20 20 24 / 7%);
+  --sheen: transparent;
+
+  --control-bg: #ffffff;
+  --filament-blur: 0px;
+  --mosaic-warm: #f08a4b;
+  --mosaic-cool: #6e56ff;
+  --score-gradient: linear-gradient(90deg, var(--amber-500), var(--coral-500));
 
   --accent-gradient: linear-gradient(180deg, #8471ff 0%, #5a44d9 100%);
   --reward-gradient: linear-gradient(90deg, var(--coral-500), var(--amber-500) 50%, var(--lime-600));

@@ -10,9 +10,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, y: 12 }}
+      initial={reduce ? false : { opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: DUR.slow, ease: EASE.out }}
+      transition={{ duration: DUR.fast, ease: EASE.out }}
     >
       {children}
     </motion.div>

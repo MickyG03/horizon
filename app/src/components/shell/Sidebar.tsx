@@ -32,7 +32,6 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
   return (
     <aside className={styles.sidebar}>
       <Link href="/" className={styles.brand} aria-label="Horizon home">
-        <HorizonMark />
         <span className={styles.wordmark}>Horizon</span>
       </Link>
 
@@ -66,7 +65,7 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
                 <motion.span
                   layoutId="nav-active"
                   className={styles.pill}
-                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  transition={{ type: "spring", stiffness: 900, damping: 60, mass: 0.6 }}
                 >
                   <span className={styles.lamp} />
                 </motion.span>
@@ -86,22 +85,5 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
         </span>
       </div>
     </aside>
-  );
-}
-
-/* A sun resting on a horizon line. */
-function HorizonMark() {
-  return (
-    <svg className={styles.mark} viewBox="0 0 24 24" width="22" height="22" aria-hidden>
-      <defs>
-        <clipPath id="horizon-mark-clip">
-          <rect x="0" y="0" width="24" height="14" />
-        </clipPath>
-      </defs>
-      <circle cx="12" cy="14" r="6.5" fill="currentColor" clipPath="url(#horizon-mark-clip)" />
-      <line x1="2" y1="14.5" x2="22" y2="14.5" stroke="currentColor" strokeWidth="1.5" />
-      <line x1="5" y1="18" x2="19" y2="18" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-      <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" strokeWidth="1" opacity="0.25" />
-    </svg>
   );
 }

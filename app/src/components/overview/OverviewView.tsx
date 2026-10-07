@@ -100,7 +100,7 @@ export function OverviewView() {
           <h1 className={`rise ${styles.title}`} style={{ "--i": 1 } as CSSProperties}>
             See past
             <br />
-            <em>the score.</em>
+            the <em>score.</em>
           </h1>
           <p className={`rise ${styles.lede}`} style={{ "--i": 2 } as CSSProperties}>
             Run HUD environments against any model, watch every step as it happens, and learn which
@@ -137,6 +137,7 @@ export function OverviewView() {
             ghost={agg.rawReward}
             label="Valid reward"
             size={320}
+            mosaic="live"
             caption={
               agg.validReward == null
                 ? "No graded runs yet."

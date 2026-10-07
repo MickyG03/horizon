@@ -20,6 +20,6 @@
 
 :root[data-theme="light"] {
   --border-subtle: rgb(20 20 24 / 8%);
-  --border-default: var(--paper-300);
-  --border-strong: var(--paper-400);
+  --border-default: #dde1e6;
+  --border-strong: #c8ced5;
 }
