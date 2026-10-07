@@ -1,31 +1,35 @@
+/* A floating glass rail. */
+
 .sidebar {
   position: sticky;
-  top: 0;
+  top: var(--space-3);
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  height: 100vh;
+  height: calc(100vh - var(--space-6));
+  margin: var(--space-3) 0 var(--space-3) var(--space-3);
   padding: var(--space-5) var(--space-3);
-  border-right: var(--border-1) solid var(--border-subtle);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--sky-top) 82%, transparent), color-mix(in srgb, var(--ground) 70%, transparent));
-  backdrop-filter: blur(18px) saturate(1.2);
-  z-index: var(--z-sticky);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  box-shadow: var(--shadow-2);
   flex-shrink: 0;
+  z-index: var(--z-sticky);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: var(--inline-gap);
-  padding: var(--space-1) var(--space-2) var(--space-5);
+  padding: var(--space-1) var(--space-3) var(--space-5);
   color: var(--fg);
 }
 
 .wordmark {
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  letter-spacing: var(--tracking-display);
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
   line-height: 1;
 }
 
@@ -36,31 +40,66 @@
   margin-bottom: var(--space-4);
 }
 
+/* Primary pill, ink on paper */
 .primary {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--inline-gap);
   height: var(--control-height);
-  border-radius: var(--radius-sm);
-  background: var(--accent-gradient);
-  color: #fff;
+  border-radius: var(--radius-pill);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  box-shadow: var(--shadow-bevel);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  isolation: isolate;
   transition:
     box-shadow var(--dur-base) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    filter var(--dur-base) var(--ease-out);
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .primary:hover {
-  filter: brightness(1.08);
-  box-shadow: var(--shadow-bevel), var(--glow-accent);
+  box-shadow: var(--shadow-2);
 }
 
 .primary:active {
   transform: translateY(1px);
+}
+
+.primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: conic-gradient(
+      rgb(255 255 255 / 26%) 25%,
+      transparent 0 50%,
+      rgb(255 255 255 / 26%) 0 75%,
+      transparent 0
+    )
+    0 0 / 4px 4px;
+  mask-image: linear-gradient(100deg, transparent 20%, black 45%, black 55%, transparent 80%);
+  mask-size: 300% 100%;
+  mask-position: 120% 0;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.primary:hover::after {
+  opacity: 1;
+  animation: pixel-sweep 900ms steps(9) infinite;
+}
+
+@keyframes pixel-sweep {
+  from {
+    mask-position: 120% 0;
+  }
+  to {
+    mask-position: -20% 0;
+  }
 }
 
 .search {
@@ -68,17 +107,18 @@
   align-items: center;
   gap: var(--inline-gap);
   height: var(--control-height-sm);
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  border: var(--border-1) solid var(--border-subtle);
-  background: var(--bg-inset);
-  box-shadow: var(--shadow-well);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: var(--border-1) solid var(--border-default);
+  background: var(--glass-strong);
   color: var(--fg-faint);
   font-size: var(--text-xs);
+  transition: border-color var(--dur-fast) var(--ease-out);
 }
 
 .search:hover {
   color: var(--fg-muted);
+  border-color: var(--border-strong);
 }
 
 .searchLabel {
@@ -104,26 +144,19 @@
   gap: var(--space-3);
   height: var(--control-height);
   padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   color: var(--fg-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  transition:
-    background var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .item:hover {
-  background: var(--bg-hover);
   color: var(--fg);
 }
 
 .item[data-active] {
   color: var(--fg);
-}
-
-.item[data-active]:hover {
-  background: transparent;
 }
 
 .icon,
@@ -132,31 +165,16 @@
   z-index: 1;
 }
 
-.item[data-active] .icon {
-  color: var(--accent);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 60%, transparent));
-}
-
-/* The active pill slides between items; a small lit bar rides on its left edge. */
+/* The active pill slides between items. */
 .pill {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-sm);
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
-    var(--bg-active);
-  box-shadow: var(--shadow-inset);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
 .lamp {
-  position: absolute;
-  left: 0;
-  top: 9px;
-  bottom: 9px;
-  width: 2px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  box-shadow: var(--glow-accent);
+  display: none;
 }
 
 .footer {
@@ -184,12 +202,10 @@
   height: 6px;
   border-radius: var(--radius-pill);
   background: var(--status-error);
-  box-shadow: var(--glow-error);
 }
 
 .meta[data-online] .dot {
   background: var(--status-success);
-  box-shadow: var(--glow-success);
 }
 
 /* Narrow viewports: collapse to an icon rail */
@@ -235,46 +251,6 @@
     flex-direction: column;
     padding-left: 0;
     padding-right: 0;
-  }
-}
-
-/* Pixel sparkle on hover: a checkerboard of light cells, stepped so it reads as pixels */
-.primary {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: conic-gradient(
-      rgb(255 255 255 / 26%) 25%,
-      transparent 0 50%,
-      rgb(255 255 255 / 26%) 0 75%,
-      transparent 0
-    )
-    0 0 / 4px 4px;
-  mask-image: linear-gradient(100deg, transparent 20%, black 45%, black 55%, transparent 80%);
-  mask-size: 300% 100%;
-  mask-position: 120% 0;
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease-out);
-}
-
-.primary:hover::after {
-  opacity: 1;
-  animation: pixel-sweep 900ms steps(9) infinite;
-}
-
-@keyframes pixel-sweep {
-  from {
-    mask-position: 120% 0;
-  }
-  to {
-    mask-position: -20% 0;
   }
 }
 

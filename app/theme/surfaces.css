@@ -1,36 +1,22 @@
 /* Shared surface treatments, used as global classes alongside component modules.
 
-   .surface              glass slab: translucent fill, backdrop blur, a lit top edge that fades
-                         down the sides (a 1px gradient border drawn with a masked pseudo-element)
-   .surface-interactive  lifts and brightens its edge on hover
+   Three layers make up the look:
+     backdrop   soft colour fields (HorizonBackdrop)
+     .surface   frosted glass cards, kept minimal: one hairline, generous padding, nothing else
+     controls   physical knobs, thumbs and switches (see --ctrl-* tokens)
+
+   .surface-interactive  lifts on hover
    .rise                 entrance animation; stagger with style={{ "--i": n }}
    .shimmer              skeleton placeholder */
 
 .surface {
   position: relative;
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(180deg, var(--sheen), transparent 42%),
-    var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
   box-shadow: var(--shadow-2);
-  isolation: isolate;
-}
-
-.surface::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(180deg, var(--edge-hi), var(--edge-lo) 55%, var(--edge-lo));
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  pointer-events: none;
-  transition: background var(--dur-base) var(--ease-out);
 }
 
 .surface-interactive {
@@ -42,14 +28,6 @@
 .surface-interactive:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-3);
-}
-
-.surface-interactive:hover::before {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 55%, var(--edge-hi)),
-    var(--edge-lo) 60%
-  );
 }
 
 .rise {

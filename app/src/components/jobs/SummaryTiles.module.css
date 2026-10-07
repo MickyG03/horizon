@@ -9,7 +9,6 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-6) var(--space-5) var(--space-5);
-  overflow: hidden;
 }
 
 .tiles {

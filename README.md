@@ -146,14 +146,20 @@ CI runs both halves and builds the Docker images.
 
 ## Design
 
-The theme is a single set of CSS custom properties under `app/theme/`. Dark ("dusk") is the
-default; "dawn" is a light theme behind the toggle. One sans family (Inter) for everything, heavier
-and tighter for headings, with JetBrains Mono for identifiers and numbers in tables. Panels are
-glass with a lit top edge, inputs are recessed wells, status is shown by lamps that glow, and
-sliders have a ridged thumb. Behind every page sits a horizon: a quiet sky, a soft sun resting on a
-single lit line, and a flat field of fine gridlines that fades out toward the edges. The reward
-gauge is that sun: a half-dial that fills from coral to lime. Pages fade in, lists stagger, run
-lamps switch on left to right, and numbers count up; all of it respects `prefers-reduced-motion`.
+The theme is a single set of CSS custom properties under `app/theme/`, built in three layers:
+
+- **Backdrop, glassmorphism.** Three soft fields of colour drift slowly behind everything.
+- **Cards, minimalism.** Frosted glass panels with one hairline and generous padding, nothing else.
+  Pill buttons, ink on paper.
+- **Controls, skeuomorphism.** Physical faders with a raised thumb and centre mark, switches whose
+  track fills with ink, a segmented control with a raised active segment, and a half-dial reward
+  gauge with a pixel ring that lights up as far as the score.
+
+Dark ("dusk") is the default; "dawn" is the light theme behind the switch. One sans family (Inter)
+for everything, heavier and tighter for headings, with JetBrains Mono for identifiers and numbers.
+The mosaic motif, square cells that dissolve in and shimmer, appears on the gauge, in empty states
+and as a pixel sweep across primary buttons. Pages fade in, lists stagger, run lamps switch on left
+to right, and numbers count up; all of it respects `prefers-reduced-motion`.
 
 ## Roadmap
 

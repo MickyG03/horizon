@@ -18,7 +18,7 @@
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: var(--fg-faint);
-  background: color-mix(in srgb, var(--surface-raised) 60%, transparent);
+  background: transparent;
   border-bottom: var(--border-1) solid var(--border-subtle);
   white-space: nowrap;
 }

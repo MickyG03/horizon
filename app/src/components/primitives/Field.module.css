@@ -28,9 +28,9 @@
   width: 100%;
   height: var(--control-height);
   padding: 0 var(--control-pad-x);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: var(--border-1) solid var(--border-default);
-  background: var(--control-bg);
+  background: var(--glass-strong);
   box-shadow: var(--shadow-1);
   color: var(--fg);
   font-size: var(--text-sm);

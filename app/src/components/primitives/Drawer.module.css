@@ -17,7 +17,7 @@
   max-width: calc(100vw - var(--space-6));
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-4);
-  --surface: color-mix(in srgb, var(--bg-panel) 94%, transparent);
+  --glass: var(--glass-strong);
   outline: none;
 }
 

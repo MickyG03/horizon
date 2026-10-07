@@ -8,7 +8,7 @@
 .main {
   flex: 1;
   min-width: 0;
-  padding: var(--page-margin);
+  padding: var(--space-6) var(--page-margin) var(--page-margin);
 }
 
 .main > * {

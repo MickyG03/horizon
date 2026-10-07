@@ -124,12 +124,42 @@
   --score-gradient: linear-gradient(90deg, var(--amber-300), var(--coral-300));
   --accent-gradient: linear-gradient(180deg, #9d8fff 0%, #6e56ff 100%);
   --reward-gradient: linear-gradient(90deg, var(--coral-400), var(--amber-400) 50%, var(--lime-400));
+
+  /* Layer 1: the backdrop. Soft colour fields behind everything. */
+  --bg-canvas: #0d0d11;
+  --blob-1: rgb(110 86 255 / 26%);
+  --blob-2: rgb(255 170 100 / 15%);
+  --blob-3: rgb(60 180 200 / 13%);
+
+  /* Layer 2: glass. Panels are frosted over the backdrop. */
+  --glass: rgb(255 255 255 / 5%);
+  --glass-strong: rgb(24 24 29 / 92%);
+  --glass-border: rgb(255 255 255 / 9%);
+  --glass-blur: 18px;
+
+  /* Layer 3: controls. Physical knobs, thumbs and switches. */
+  --ctrl-face: linear-gradient(180deg, #30303a 0%, #202026 100%);
+  --ctrl-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 1px 1px rgb(0 0 0 / 40%),
+    0 4px 10px rgb(0 0 0 / 40%);
+  --ctrl-shadow-hover:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 2px 2px rgb(0 0 0 / 40%),
+    0 8px 18px rgb(0 0 0 / 45%);
+  --ctrl-track: #0a0a0d;
+  --ctrl-track-shadow: inset 0 1px 2px rgb(0 0 0 / 70%), inset 0 0 0 1px rgb(255 255 255 / 4%);
+  --ctrl-on: var(--accent);
+  --ctrl-mark: var(--fg);
+
+  /* Pill buttons: ink on paper */
+  --btn-primary-bg: #f4f4f6;
+  --btn-primary-fg: #0d0d11;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-canvas: #f3f5f7;
   --bg-panel: #ffffff;
   --bg-panel-raised: #ffffff;
   --bg-inset: #eef1f4;
@@ -195,4 +225,31 @@
 
   --accent-gradient: linear-gradient(180deg, #8471ff 0%, #5a44d9 100%);
   --reward-gradient: linear-gradient(90deg, var(--coral-500), var(--amber-500) 50%, var(--lime-600));
+
+  --bg-canvas: #eef0f3;
+  --blob-1: rgb(190 180 255 / 55%);
+  --blob-2: rgb(255 200 160 / 60%);
+  --blob-3: rgb(170 205 235 / 55%);
+
+  --glass: rgb(255 255 255 / 58%);
+  --glass-strong: rgb(255 255 255 / 92%);
+  --glass-border: rgb(255 255 255 / 85%);
+  --glass-blur: 22px;
+
+  --ctrl-face: linear-gradient(180deg, #ffffff 0%, #ededf0 100%);
+  --ctrl-shadow:
+    inset 0 1px 0 #ffffff,
+    0 1px 1px rgb(20 20 24 / 8%),
+    0 4px 10px rgb(20 20 24 / 12%);
+  --ctrl-shadow-hover:
+    inset 0 1px 0 #ffffff,
+    0 2px 2px rgb(20 20 24 / 8%),
+    0 8px 18px rgb(20 20 24 / 16%);
+  --ctrl-track: #e2e4e9;
+  --ctrl-track-shadow: inset 0 1px 2px rgb(20 20 24 / 14%);
+  --ctrl-on: #1b1b1f;
+  --ctrl-mark: #1b1b1f;
+
+  --btn-primary-bg: #141418;
+  --btn-primary-fg: #ffffff;
 }

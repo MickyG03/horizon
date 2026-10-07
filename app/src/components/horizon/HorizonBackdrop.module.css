@@ -1,103 +1,55 @@
 .backdrop {
-  --horizon-y: 36vh;
-  --sun-x: 70%;
-  --cell: 56px;
-
   position: fixed;
   inset: 0;
   z-index: var(--z-backdrop);
   overflow: hidden;
   pointer-events: none;
-
-  /* Sky and ground are one gradient, so there is no seam at the horizon; the glow is a radial
-     on the same layer, so it can't be clipped by a box edge. */
-  background:
-    radial-gradient(
-      42% 26% at var(--sun-x) var(--horizon-y),
-      var(--horizon-glow-a) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      90% 30% at 50% var(--horizon-y),
-      var(--horizon-glow-b) 0%,
-      transparent 70%
-    ),
-    linear-gradient(
-      to bottom,
-      var(--sky-top) 0%,
-      var(--sky-mid) calc(var(--horizon-y) - 12vh),
-      var(--sky-low) var(--horizon-y),
-      var(--ground) calc(var(--horizon-y) + 22vh),
-      var(--ground) 100%
-    );
+  background: var(--bg-canvas);
 }
 
-/* Flat gridlines: one even field, brightest near the horizon, dissolving toward the edges. */
-.grid {
+.blob {
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--cell) var(--cell);
-  background-position: center var(--horizon-y);
-  mask-image: radial-gradient(
-    70% 60% at 62% var(--horizon-y),
-    black 0%,
-    rgb(0 0 0 / 50%) 45%,
-    transparent 85%
-  );
-}
-
-/* Sun: a soft disc whose lower half is hidden below the horizon. A pure radial gradient with no
-   blur filter, so the edge of its box never shows. */
-.sun {
-  position: absolute;
-  left: var(--sun-x);
-  top: var(--horizon-y);
-  width: min(46vh, 460px);
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  clip-path: inset(0 0 50% 0);
-  background: radial-gradient(
-    closest-side,
-    var(--sun-core) 0%,
-    color-mix(in srgb, var(--sun-core) 50%, var(--sun-edge)) 40%,
-    var(--sun-edge) 65%,
-    transparent 100%
-  );
-  opacity: 0.55;
-  animation: breathe 10s var(--ease-in-out) infinite alternate;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--blob-color), transparent);
+  animation: drift 48s var(--ease-in-out) infinite alternate;
+  will-change: transform;
 }
 
-/* The one strong line on the page */
-.line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: var(--horizon-y);
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent 4%,
-    var(--grid-line-strong) 25%,
-    var(--horizon-line) var(--sun-x),
-    var(--grid-line-strong) 88%,
-    transparent 98%
-  );
+.one {
+  --blob-color: var(--blob-1);
+
+  width: 70vw;
+  left: -18vw;
+  top: -28vw;
 }
 
-@keyframes breathe {
-  from {
-    opacity: 0.45;
-  }
+.two {
+  --blob-color: var(--blob-2);
+
+  width: 58vw;
+  right: -16vw;
+  top: 4vh;
+  animation-delay: -17s;
+}
+
+.three {
+  --blob-color: var(--blob-3);
+
+  width: 60vw;
+  left: 22vw;
+  bottom: -34vw;
+  animation-delay: -31s;
+}
+
+@keyframes drift {
   to {
-    opacity: 0.62;
+    transform: translate(5vw, 4vh) scale(1.08);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sun {
+  .blob {
     animation: none;
   }
 }

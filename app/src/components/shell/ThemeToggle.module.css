@@ -1,37 +1,42 @@
+/* A physical switch: recessed track that fills with ink when on, raised thumb that slides. */
+
 .toggle {
   display: inline-flex;
   padding: var(--space-1);
   border-radius: var(--radius-pill);
 }
 
-/* A physical switch: recessed rail, bevelled thumb that slides across */
 .track {
   position: relative;
   display: block;
-  width: 40px;
-  height: 22px;
+  width: 44px;
+  height: 24px;
   border-radius: var(--radius-pill);
-  background: var(--bg-inset);
-  box-shadow: var(--shadow-well);
+  background: var(--ctrl-track);
+  box-shadow: var(--ctrl-track-shadow);
   transition: background var(--dur-base) var(--ease-out);
+}
+
+.track[data-theme="dark"] {
+  background: var(--ctrl-on);
 }
 
 .thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 3px;
+  left: 3px;
   display: grid;
   place-items: center;
   width: 18px;
   height: 18px;
   border-radius: var(--radius-pill);
-  color: var(--fg);
-  background: var(--bg-panel-raised);
-  box-shadow: var(--shadow-bevel);
+  color: var(--ctrl-mark);
+  background: var(--ctrl-face);
+  box-shadow: var(--ctrl-shadow);
   transition: transform var(--dur-base) var(--ease-spring);
 }
 
 .track[data-theme="light"] .thumb {
-  transform: translateX(18px);
+  transform: translateX(20px);
   color: var(--amber-600);
 }

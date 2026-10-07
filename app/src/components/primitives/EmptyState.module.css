@@ -7,10 +7,8 @@
   gap: var(--space-3);
   padding: var(--space-12) var(--space-6);
   text-align: center;
-  border: var(--border-1) dashed var(--border-default);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface) 55%, transparent);
-  backdrop-filter: blur(10px);
   color: var(--fg-muted);
 }
 
@@ -20,9 +18,9 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-pill);
-  background: var(--bg-inset);
-  box-shadow: var(--shadow-well);
-  color: var(--fg-faint);
+  background: var(--ctrl-face);
+  box-shadow: var(--ctrl-shadow);
+  color: var(--fg-muted);
 }
 
 .title {

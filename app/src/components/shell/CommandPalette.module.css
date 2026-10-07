@@ -16,7 +16,7 @@
   overflow: hidden;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-4);
-  --surface: color-mix(in srgb, var(--bg-panel) 92%, transparent);
+  --glass: var(--glass-strong);
   animation: palette-in var(--dur-base) var(--ease-out);
   outline: none;
 }
