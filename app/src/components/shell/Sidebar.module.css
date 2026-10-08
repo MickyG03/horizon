@@ -17,6 +17,25 @@
   box-shadow: var(--shadow-2);
   flex-shrink: 0;
   z-index: var(--z-sticky);
+  overflow: hidden;
+}
+
+/* Pixels rising from the floor of the rail */
+.mosaic {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  pointer-events: none;
+}
+
+.brand,
+.actions,
+.nav,
+.footer {
+  position: relative;
+  z-index: 1;
 }
 
 .brand {

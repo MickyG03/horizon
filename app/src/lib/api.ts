@@ -7,6 +7,7 @@ import type {
   JobDetail,
   ProbeReport,
   Provider,
+  ProviderKey,
   Run,
   RunDetail,
 } from "@/types/api";
@@ -46,6 +47,16 @@ const json = (body: unknown): RequestInit => ({ method: "POST", body: JSON.strin
 export const api = {
   health: () => request<{ status: string; hud: string }>("/health"),
   providers: () => request<Provider[]>("/providers"),
+  keys: {
+    list: () => request<ProviderKey[]>("/settings/keys"),
+    save: (provider: string, value: string) =>
+      request<ProviderKey>(`/settings/keys/${provider}`, {
+        method: "PUT",
+        body: JSON.stringify({ value }),
+      }),
+    remove: (provider: string) =>
+      request<ProviderKey>(`/settings/keys/${provider}`, { method: "DELETE" }),
+  },
   envs: {
     list: () => request<Env[]>("/envs"),
     get: (id: string) => request<Env>(`/envs/${id}`),
@@ -87,6 +98,7 @@ export const api = {
 export const keys = {
   health: ["health"] as const,
   providers: ["providers"] as const,
+  keys: ["keys"] as const,
   envs: ["envs"] as const,
   env: (id: string) => ["envs", id] as const,
   jobs: (params: Record<string, string | number | undefined> = {}) => ["jobs", params] as const,

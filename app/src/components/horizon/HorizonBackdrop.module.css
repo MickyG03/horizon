@@ -27,18 +27,18 @@
 .two {
   --blob-color: var(--blob-2);
 
-  width: 58vw;
-  right: -16vw;
-  top: 4vh;
+  width: 64vw;
+  right: -20vw;
+  bottom: -30vw;
   animation-delay: -17s;
 }
 
 .three {
   --blob-color: var(--blob-3);
 
-  width: 60vw;
-  left: 22vw;
-  bottom: -34vw;
+  width: 50vw;
+  left: 30vw;
+  top: -10vw;
   animation-delay: -31s;
 }
 

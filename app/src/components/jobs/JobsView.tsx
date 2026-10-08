@@ -5,8 +5,10 @@ import { useState } from "react";
 
 import { Button } from "@/components/primitives/Button";
 import { EmptyState } from "@/components/primitives/EmptyState";
-import { Select } from "@/components/primitives/Field";
+import { Combobox } from "@/components/primitives/Combobox";
+import { Select } from "@/components/primitives/Select";
 import { PageHeader } from "@/components/shell/PageHeader";
+import { envItems } from "@/lib/envs";
 import { useEnvs, useJobs } from "@/lib/queries";
 
 import { JobsTable } from "./JobsTable";
@@ -21,6 +23,7 @@ export function JobsView() {
   const [launch, setLaunch] = useState(false);
   const { data: envs = [] } = useEnvs();
   const jobs = useJobs({ status: status || undefined, env_id: envId || undefined, limit: 200 });
+  const { data: allJobs = [] } = useJobs({ limit: 200 });
 
   return (
     <div className={styles.page}>
@@ -36,21 +39,25 @@ export function JobsView() {
       />
 
       <div className={styles.filters}>
-        <Select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s ? s[0].toUpperCase() + s.slice(1) : "Any status"}
-            </option>
-          ))}
-        </Select>
-        <Select value={envId} onChange={(e) => setEnvId(e.target.value)} aria-label="Environment">
-          <option value="">Any environment</option>
-          {envs.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.name}
-            </option>
-          ))}
-        </Select>
+        <Select
+          value={status}
+          onChange={setStatus}
+          size="sm"
+          aria-label="Status"
+          options={STATUSES.map((s) => ({
+            value: s,
+            label: s ? s[0].toUpperCase() + s.slice(1) : "Any status",
+          }))}
+        />
+        <Combobox
+          value={envId}
+          onChange={setEnvId}
+          items={envItems(envs, allJobs)}
+          clearLabel="Any environment"
+          searchPlaceholder="Search environments…"
+          size="sm"
+          aria-label="Environment"
+        />
         <span className={styles.count}>
           {jobs.data ? `${jobs.data.length} job${jobs.data.length === 1 ? "" : "s"}` : ""}
         </span>

@@ -48,10 +48,19 @@ function stub(job: Job, id: string, cause: string | null): Run {
 
 /* `compact` folds model and env under the job name and drops the secondary columns, for narrow
    placements like the overview. */
-export function JobsTable({ jobs, compact = false }: { jobs: Job[]; compact?: boolean }) {
+export function JobsTable({
+  jobs,
+  compact = false,
+  bare = false,
+}: {
+  jobs: Job[];
+  compact?: boolean;
+  /* Render without its own glass card, for use inside a Panel. */
+  bare?: boolean;
+}) {
   const router = useRouter();
   return (
-    <div className={`surface rise ${table.wrap}`}>
+    <div className={bare ? table.bareWrap : `surface rise ${table.wrap}`}>
       <table className={table.table}>
         <thead>
           <tr>

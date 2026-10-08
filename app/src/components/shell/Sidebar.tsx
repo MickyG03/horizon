@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Mosaic } from "@/components/horizon/Mosaic";
 import { Kbd } from "@/components/primitives/Kbd";
 import { useHealth } from "@/lib/queries";
 
@@ -76,6 +77,10 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
           );
         })}
       </nav>
+
+      <div className={styles.mosaic}>
+        <Mosaic shape="rise" tone="warm" cell={4} gap={3} intensity={0.55} />
+      </div>
 
       <div className={styles.footer}>
         <ThemeToggle />

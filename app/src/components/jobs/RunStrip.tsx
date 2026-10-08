@@ -5,7 +5,7 @@ import type { Run } from "@/types/api";
 
 import styles from "./RunStrip.module.css";
 
-const MAX_TILES = 80;
+const MAX_TILES = 40;
 
 /* One lamp per run, lit by cause rather than pass/fail. Lamps switch on left to right. */
 export function RunStrip({ runs, size = "md" }: { runs: Run[]; size?: "sm" | "md" }) {

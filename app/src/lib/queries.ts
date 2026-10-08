@@ -11,6 +11,31 @@ export const useHealth = () =>
 export const useProviders = () =>
   useQuery({ queryKey: keys.providers, queryFn: api.providers, staleTime: 60_000 });
 
+export const useKeys = () => useQuery({ queryKey: keys.keys, queryFn: api.keys.list });
+
+export function useSaveKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ provider, value }: { provider: string; value: string }) =>
+      api.keys.save(provider, value),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.keys });
+      qc.invalidateQueries({ queryKey: keys.providers });
+    },
+  });
+}
+
+export function useRemoveKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (provider: string) => api.keys.remove(provider),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.keys });
+      qc.invalidateQueries({ queryKey: keys.providers });
+    },
+  });
+}
+
 export const useEnvs = () => useQuery({ queryKey: keys.envs, queryFn: api.envs.list });
 
 export const useEnv = (id: string) =>

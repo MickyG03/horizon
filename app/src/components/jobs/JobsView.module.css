@@ -10,10 +10,6 @@
   gap: var(--inline-gap);
 }
 
-.filters > * {
-  width: auto;
-  min-width: 160px;
-}
 
 .count {
   margin-left: auto;

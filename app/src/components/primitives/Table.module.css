@@ -75,3 +75,18 @@
   overflow: auto;
   border-radius: var(--radius-lg);
 }
+
+.bareWrap {
+  overflow: auto;
+  margin: 0 calc(var(--space-6) * -1);
+}
+
+.bareWrap .table th:first-child,
+.bareWrap .table td:first-child {
+  padding-left: var(--space-6);
+}
+
+.bareWrap .table th:last-child,
+.bareWrap .table td:last-child {
+  padding-right: var(--space-6);
+}

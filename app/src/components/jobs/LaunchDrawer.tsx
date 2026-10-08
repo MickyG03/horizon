@@ -6,10 +6,13 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/primitives/Button";
 import { Drawer } from "@/components/primitives/Drawer";
-import { Field, Input, Row, Select } from "@/components/primitives/Field";
+import { Combobox } from "@/components/primitives/Combobox";
+import { Field, Input, Row } from "@/components/primitives/Field";
+import { Select } from "@/components/primitives/Select";
 import { ApiError } from "@/lib/api";
 import { fmtArgs } from "@/lib/format";
-import { useCreateJob, useEnvs, useProviders } from "@/lib/queries";
+import { envItems } from "@/lib/envs";
+import { useCreateJob, useEnvs, useJobs, useProviders } from "@/lib/queries";
 import type { AgentType, JobCreate } from "@/types/api";
 
 import styles from "./LaunchDrawer.module.css";
@@ -24,6 +27,7 @@ export function LaunchDrawer({ open, onOpenChange, defaultEnvId }: LaunchDrawerP
   const router = useRouter();
   const { data: envs = [] } = useEnvs();
   const { data: providers = [] } = useProviders();
+  const { data: jobs = [] } = useJobs({ limit: 200 });
   const create = useCreateJob();
 
   // User choices are stored as overrides; the effective values fall back to sensible defaults so
@@ -106,20 +110,18 @@ export function LaunchDrawer({ open, onOpenChange, defaultEnvId }: LaunchDrawerP
       }
     >
       <Field label="Environment" htmlFor="launch-env">
-        <Select
+        <Combobox
           id="launch-env"
           value={env?.id ?? ""}
-          onChange={(e) => {
-            setEnvChoice(e.target.value);
+          onChange={(v) => {
+            setEnvChoice(v);
             setSelected(new Set());
           }}
-        >
-          {envs.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.name} · {e.task_count} tasks
-            </option>
-          ))}
-        </Select>
+          items={envItems(envs, jobs)}
+          placeholder="Choose an environment"
+          searchPlaceholder="Search environments…"
+          width="100%"
+        />
       </Field>
 
       <Row>
@@ -127,15 +129,19 @@ export function LaunchDrawer({ open, onOpenChange, defaultEnvId }: LaunchDrawerP
           <Select
             id="launch-provider"
             value={agentType}
-            onChange={(e) => pickProvider(e.target.value as AgentType)}
-          >
-            {providers.map((p) => (
-              <option key={p.agent_type} value={p.agent_type} disabled={!p.available}>
-                {p.label}
-                {!p.available ? " (no key)" : ""}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => pickProvider(v as AgentType)}
+            width="100%"
+            options={providers.map((p) => ({
+              value: p.agent_type,
+              label: p.label,
+              hint: !p.available
+                ? "no key: add one in Settings"
+                : p.via === "hud_gateway"
+                  ? "via HUD gateway"
+                  : undefined,
+              disabled: !p.available,
+            }))}
+          />
         </Field>
         <Field
           label="Model"

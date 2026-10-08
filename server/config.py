@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     # Upload traces to hud.ai. Off by default: Horizon is local-first and never phones home
     # unless asked.
     telemetry_sync: bool = False
+    # Where provider keys entered in the UI are saved: the same file `hud set` writes, so the
+    # hud CLI and Horizon always agree on which keys exist.
+    hud_env_file: Path = Path.home() / ".hud" / ".env"
 
     @property
     def origins(self) -> list[str]:

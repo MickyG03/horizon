@@ -30,14 +30,6 @@ export function Input(props: ComponentPropsWithoutRef<"input">) {
   return <input {...props} className={`${styles.control} ${props.className ?? ""}`} />;
 }
 
-export function Select(props: ComponentPropsWithoutRef<"select">) {
-  return (
-    <div className={styles.selectWrap}>
-      <select {...props} className={`${styles.control} ${styles.select} ${props.className ?? ""}`} />
-    </div>
-  );
-}
-
 export function Textarea(props: ComponentPropsWithoutRef<"textarea">) {
   return (
     <textarea {...props} className={`${styles.control} ${styles.textarea} ${props.className ?? ""}`} />

@@ -8,7 +8,8 @@ import { useMemo, type CSSProperties } from "react";
 import { HorizonGauge } from "@/components/horizon/HorizonGauge";
 import { LED } from "@/components/horizon/LED";
 import { Panel } from "@/components/horizon/Panel";
-import { StatTile } from "@/components/horizon/StatTile";
+import { PixelIsland } from "@/components/horizon/PixelIsland";
+import { CountUp, StatTile } from "@/components/horizon/StatTile";
 import { JobsTable } from "@/components/jobs/JobsTable";
 import { Button } from "@/components/primitives/Button";
 import { EmptyState } from "@/components/primitives/EmptyState";
@@ -73,6 +74,8 @@ function greeting() {
   return "Evening";
 }
 
+const int = (v: number) => Math.round(v).toLocaleString("en-US");
+
 export function OverviewView() {
   const { data: envs } = useEnvs();
   const { data: jobs, isLoading } = useJobs({ limit: 200 });
@@ -88,26 +91,28 @@ export function OverviewView() {
 
   return (
     <div className={styles.page}>
-      <section className={styles.hero}>
-        <div className={styles.heroText}>
-          <p className={`t-overline rise ${styles.eyebrow}`} style={{ "--i": 0 } as CSSProperties}>
+      {/* The stage: words on the left, the island on the right, numbers along the bottom. */}
+      <section className={`surface rise ${styles.stage}`}>
+        <PixelIsland />
+        <div className={styles.stageText}>
+          <p className={`t-overline ${styles.eyebrow}`}>
             <LED
               color={health.isSuccess ? "var(--status-success)" : "var(--status-error)"}
               size={6}
             />
             {greeting()} · {health.isSuccess ? `hud ${health.data?.hud} · offline` : "api unreachable"}
           </p>
-          <h1 className={`rise ${styles.title}`} style={{ "--i": 1 } as CSSProperties}>
+          <h1 className={styles.title}>
             See past
             <br />
             the <em>score.</em>
           </h1>
-          <p className={`rise ${styles.lede}`} style={{ "--i": 2 } as CSSProperties}>
+          <p className={styles.lede}>
             Run HUD environments against any model, watch every step as it happens, and learn which
             failures were the model&apos;s, which were the grader&apos;s, and which were just the
             network.
           </p>
-          <div className={`rise ${styles.heroActions}`} style={{ "--i": 3 } as CSSProperties}>
+          <div className={styles.heroActions}>
             {noEnvs ? (
               <Link href="/envs">
                 <Button variant="primary" icon={<Boxes size={14} />}>
@@ -124,29 +129,27 @@ export function OverviewView() {
               </Button>
             )}
             <Link href="/jobs">
-              <Button variant="ghost" icon={<ArrowRight size={14} />}>
+              <Button variant="secondary" icon={<ArrowRight size={14} />}>
                 Browse jobs
               </Button>
             </Link>
           </div>
         </div>
 
-        <div className={`rise ${styles.heroGauge}`} style={{ "--i": 2 } as CSSProperties}>
-          <HorizonGauge
-            value={agg.validReward}
-            ghost={agg.rawReward}
-            label="Valid reward"
-            size={320}
-            mosaic="live"
-            caption={
-              agg.validReward == null
-                ? "No graded runs yet."
-                : delta != null && delta > 0.0005
-                  ? `${fmtPercent(delta)} above the raw score once ${agg.infra} infrastructure failure${agg.infra === 1 ? "" : "s"} are set aside. The thin arc is raw.`
-                  : `Across ${agg.validN} counted run${agg.validN === 1 ? "" : "s"}. The thin arc is the raw score.`
-            }
-          />
-        </div>
+        <dl className={styles.stageStats}>
+          {[
+            { label: "Task runs", value: agg.runs, fmt: int },
+            { label: "Environments", value: agg.envs, fmt: int },
+            { label: "Tokens", value: agg.tokens, fmt: (v: number) => fmtTokens(Math.round(v)) },
+          ].map((s) => (
+            <div key={s.label} className={styles.stageStat}>
+              <dt>{s.label}</dt>
+              <dd className="t-num">
+                <CountUp value={s.value} format={s.fmt} />
+              </dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       {noEnvs ? (
@@ -164,9 +167,25 @@ export function OverviewView() {
         />
       ) : (
         <>
-          <div className={styles.tiles}>
+          <div className={styles.readings}>
+            <div className={`surface rise ${styles.gaugeCard}`} style={{ "--i": 1 } as CSSProperties}>
+              <HorizonGauge
+                value={agg.validReward}
+                ghost={agg.rawReward}
+                label="Valid reward"
+                size={280}
+                mosaic="live"
+                caption={
+                  agg.validReward == null
+                    ? "No graded runs yet."
+                    : delta != null && delta > 0.0005
+                      ? `${fmtPercent(delta)} above the raw score once ${agg.infra} infrastructure failure${agg.infra === 1 ? "" : "s"} are set aside.`
+                      : `Across ${agg.validN} counted run${agg.validN === 1 ? "" : "s"}.`
+                }
+              />
+            </div>
             <StatTile
-              index={4}
+              index={2}
               label="Infra failure rate"
               accent={agg.infraRate ? "var(--cause-infra)" : undefined}
               value={fmtPercent(agg.infraRate)}
@@ -178,10 +197,10 @@ export function OverviewView() {
               hint={`${agg.infra} of ${agg.done} runs lost to providers, quotas, timeouts`}
             />
             <StatTile
-              index={5}
+              index={3}
               label="Jobs"
               value={agg.jobs}
-              numeric={{ value: agg.jobs, format: (v) => String(Math.round(v)) }}
+              numeric={{ value: agg.jobs, format: int }}
               lamp={
                 <LED
                   color={agg.running ? "var(--status-running)" : "var(--status-idle)"}
@@ -191,14 +210,7 @@ export function OverviewView() {
               hint={agg.running ? `${agg.running} running now` : "none running"}
             />
             <StatTile
-              index={6}
-              label="Runs"
-              value={agg.runs}
-              numeric={{ value: agg.runs, format: (v) => String(Math.round(v)) }}
-              hint={`${fmtTokens(agg.tokens)} tokens`}
-            />
-            <StatTile
-              index={7}
+              index={4}
               label="Grader health"
               accent={
                 agg.graderHealth != null && agg.graderHealth < 1 ? "var(--cause-grader)" : undefined
@@ -209,29 +221,33 @@ export function OverviewView() {
                   ? { value: agg.graderHealth, format: (v) => fmtPercent(v) }
                   : undefined
               }
-              hint={`${agg.envs} environment${agg.envs === 1 ? "" : "s"} · probes rejected`}
+              hint="of junk-answer probes rejected"
             />
           </div>
 
           <div className={styles.columns}>
-            <section className={styles.recent}>
-              <div className={styles.sectionHead}>
-                <h2 className="t-overline">Recent jobs</h2>
+            <Panel
+              index={5}
+              eyebrow="Recent jobs"
+              title="Latest evals"
+              actions={
                 <Link href="/jobs" className={styles.more}>
                   All jobs <ArrowRight size={12} />
                 </Link>
-              </div>
+              }
+              className={styles.recent}
+            >
               {jobs && jobs.length ? (
-                <JobsTable jobs={jobs.slice(0, 6)} compact />
+                <JobsTable jobs={jobs.slice(0, 6)} compact bare />
               ) : (
-                <EmptyState title="No jobs yet" description="Launch a run to see it here." />
+                <p className={styles.muted}>No jobs yet. Launch a run to see it here.</p>
               )}
-            </section>
+            </Panel>
 
             <Panel
-              index={8}
+              index={6}
               eyebrow="Activity"
-              title="Live feed"
+              title="What happened"
               actions={
                 <span className={styles.conn} data-on={connected || undefined}>
                   <LED
@@ -239,38 +255,12 @@ export function OverviewView() {
                     pulse={connected}
                     size={6}
                   />
-                  {connected ? "listening" : "offline"}
+                  {connected ? "live" : "offline"}
                 </span>
               }
               className={styles.feed}
             >
-              {events.length === 0 ? (
-                <div className={styles.radar}>
-                  <span className={styles.ring} />
-                  <span className={styles.ring} style={{ animationDelay: "1s" }} />
-                  <span className={styles.ring} style={{ animationDelay: "2s" }} />
-                  <span className={styles.core} />
-                  <p className={styles.radarText}>Events land here the moment a run starts.</p>
-                </div>
-              ) : (
-                <ul className={styles.feedList}>
-                  <AnimatePresence initial={false}>
-                    {events.map((event) => (
-                      <motion.li
-                        key={`${event.ts}-${event.type}-${event.run_id ?? ""}`}
-                        className={styles.feedItem}
-                        layout
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: DUR.base, ease: EASE.out }}
-                      >
-                        <FeedLine event={event} />
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </ul>
-              )}
+              <ActivityList events={events} jobs={jobs ?? []} />
             </Panel>
           </div>
         </>
@@ -279,36 +269,99 @@ export function OverviewView() {
   );
 }
 
-function FeedLine({ event }: { event: HorizonEvent }) {
-  const run = event.run_id ? (event.data as Run | null) : null;
-  const jobData = !event.run_id ? (event.data as Partial<Job> | null) : null;
+type Line = { key: string; href: string; color: string; title: string; detail: string; ts: string };
 
-  let color = "var(--status-idle)";
-  let text = event.type;
-  if (event.type === "run.graded" && run?.cause) {
-    const cause = CAUSES[run.cause];
-    color = cause?.kind === "ok" ? "var(--cause-ok)" : kindColor(cause?.kind);
-    text = `${run.slug} · ${cause?.label ?? run.cause} · ${run.reward ?? "—"}`;
-  } else if (event.type === "run.failed" && run) {
-    color = kindColor(run.cause_kind);
-    text = `${run.slug} · ${CAUSES[run.cause ?? ""]?.label ?? "failed"}`;
-  } else if (event.type === "run.started") {
-    color = "var(--status-running)";
-    text = "run started";
-  } else if (event.type.startsWith("job.")) {
-    const status = event.type.slice(4);
-    color = jobStatusColor(status === "started" ? "running" : ((status as Job["status"]) ?? "queued"));
-    text = `${jobData?.name ?? "job"} · ${status}`;
+/* Live events first, then the history of recent jobs, so the panel is never empty. */
+function ActivityList({ events, jobs }: { events: HorizonEvent[]; jobs: Job[] }) {
+  const lines = useMemo(() => {
+    const live: Line[] = events.map((e) => eventLine(e));
+    const seen = new Set(events.map((e) => e.job_id));
+    const history: Line[] = jobs
+      .filter((j) => !seen.has(j.id))
+      .slice(0, 10)
+      .map((j) => jobLine(j));
+    return [...live, ...history].slice(0, 12);
+  }, [events, jobs]);
+
+  if (lines.length === 0) {
+    return <p className={styles.muted}>Events land here the moment a run starts.</p>;
   }
 
   return (
-    <Link
-      href={event.run_id ? `/runs/${event.run_id}` : `/jobs/${event.job_id}`}
-      className={styles.feedLink}
-    >
-      <LED color={color} size={7} />
-      <span className={styles.feedText}>{text}</span>
-      <span className={styles.feedTime}>{fmtRelative(event.ts)}</span>
-    </Link>
+    <ul className={styles.feedList}>
+      <AnimatePresence initial={false}>
+        {lines.map((l) => (
+          <motion.li
+            key={l.key}
+            layout
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: DUR.base, ease: EASE.out }}
+          >
+            <Link href={l.href} className={styles.feedLink}>
+              <span className={styles.feedDot} style={{ background: l.color }} />
+              <span className={styles.feedText}>
+                <span className={styles.feedTitle}>{l.title}</span>
+                <span className={styles.feedDetail}>{l.detail}</span>
+              </span>
+              <span className={styles.feedTime}>{fmtRelative(l.ts)}</span>
+            </Link>
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </ul>
   );
+}
+
+function jobLine(j: Job): Line {
+  const s = j.summary;
+  const parts = [
+    j.env_name ?? "env",
+    s.valid_reward != null ? `${fmtPercent(s.valid_reward)} valid` : null,
+    s.infra_failures ? `${s.infra_failures} infra` : null,
+    `${j.runs_done}/${j.runs_total} runs`,
+  ].filter(Boolean);
+  return {
+    key: `job-${j.id}`,
+    href: `/jobs/${j.id}`,
+    color: jobStatusColor(j.status),
+    title: `${j.model} ${j.status}`,
+    detail: parts.join(" · "),
+    ts: j.finished_at ?? j.started_at ?? j.created_at,
+  };
+}
+
+function eventLine(event: HorizonEvent): Line {
+  const run = event.run_id ? (event.data as Run | null) : null;
+  const job = !event.run_id ? (event.data as Partial<Job> | null) : null;
+  const base = {
+    key: `${event.ts}-${event.type}-${event.run_id ?? ""}`,
+    href: event.run_id ? `/runs/${event.run_id}` : `/jobs/${event.job_id}`,
+    ts: event.ts,
+  };
+  if ((event.type === "run.graded" || event.type === "run.failed") && run) {
+    const cause = CAUSES[run.cause ?? ""];
+    return {
+      ...base,
+      color: cause?.kind === "ok" ? "var(--cause-ok)" : kindColor(run.cause_kind),
+      title: cause?.label ?? "Run finished",
+      detail: `${run.slug}${run.reward != null ? ` · reward ${run.reward}` : ""}`,
+    };
+  }
+  if (event.type === "run.started") {
+    return {
+      ...base,
+      color: "var(--status-running)",
+      title: "Run started",
+      detail: event.run_id?.slice(0, 8) ?? "",
+    };
+  }
+  const status = event.type.replace("job.", "");
+  return {
+    ...base,
+    color: jobStatusColor(status === "started" ? "running" : ((status as Job["status"]) ?? "queued")),
+    title: `${job?.model ?? "Job"} ${status}`,
+    detail: job?.name ?? "",
+  };
 }

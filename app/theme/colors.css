@@ -152,6 +152,24 @@
   --ctrl-on: var(--accent);
   --ctrl-mark: var(--fg);
 
+  /* Showcase scene (PixelIsland) */
+  --scene-grass-1: #5d8a45;
+  --scene-grass-2: #4c7639;
+  --scene-grass-3: #6e9c52;
+  --scene-leaf-1: #2f5326;
+  --scene-leaf-2: #3e6a30;
+  --scene-leaf-3: #557f3f;
+  --scene-earth-1: #4a3b2c;
+  --scene-earth-2: #3a2e23;
+  --scene-earth-3: #5a4834;
+  --scene-earth-4: #2a211a;
+  --scene-moss: #3f5a2f;
+  --scene-water-1: #7fb2d6;
+  --scene-water-2: #b5dcf0;
+  --scene-trunk: #3b2c20;
+  --scene-cloud: #e9e6f2;
+  --scene-sun: #ffb27a;
+
   /* Pill buttons: ink on paper */
   --btn-primary-bg: #f4f4f6;
   --btn-primary-fg: #0d0d11;
@@ -227,9 +245,9 @@
   --reward-gradient: linear-gradient(90deg, var(--coral-500), var(--amber-500) 50%, var(--lime-600));
 
   --bg-canvas: #eef0f3;
-  --blob-1: rgb(190 180 255 / 55%);
+  --blob-1: rgb(255 200 160 / 60%);
   --blob-2: rgb(255 200 160 / 60%);
-  --blob-3: rgb(170 205 235 / 55%);
+  --blob-3: transparent;
 
   --glass: rgb(255 255 255 / 58%);
   --glass-strong: rgb(255 255 255 / 92%);
@@ -249,6 +267,23 @@
   --ctrl-track-shadow: inset 0 1px 2px rgb(20 20 24 / 14%);
   --ctrl-on: #1b1b1f;
   --ctrl-mark: #1b1b1f;
+
+  --scene-grass-1: #8cc06a;
+  --scene-grass-2: #79ad59;
+  --scene-grass-3: #a3d07f;
+  --scene-leaf-1: #4f7f3d;
+  --scene-leaf-2: #66974a;
+  --scene-leaf-3: #84b45f;
+  --scene-earth-1: #8a7254;
+  --scene-earth-2: #6f5b43;
+  --scene-earth-3: #a08665;
+  --scene-earth-4: #574735;
+  --scene-moss: #6f8f4f;
+  --scene-water-1: #8cc4e6;
+  --scene-water-2: #c6e6f6;
+  --scene-trunk: #5e4733;
+  --scene-cloud: #ffffff;
+  --scene-sun: #ffa86a;
 
   --btn-primary-bg: #141418;
   --btn-primary-fg: #ffffff;

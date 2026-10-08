@@ -8,6 +8,8 @@ import { API_URL } from "@/lib/api";
 import { useHealth, useProviders } from "@/lib/queries";
 import { useTheme } from "@/lib/theme";
 
+import { KeysPanel } from "./KeysPanel";
+
 import styles from "./SettingsView.module.css";
 
 const VIA_TEXT = {
@@ -26,8 +28,10 @@ export function SettingsView() {
       <PageHeader
         eyebrow="Settings"
         title="Providers, connection, appearance"
-        description="Keys are read by the hud SDK from your environment, ./.env or ~/.hud/.env. Horizon only ever sees whether one is present."
+        description="Add a provider key and Horizon can run that model. Keys stay on this machine."
       />
+
+      <KeysPanel />
 
       <Panel eyebrow="Providers" title="What can run right now">
         <ul className={styles.providers}>
@@ -37,7 +41,7 @@ export function SettingsView() {
               <div className={styles.providerText}>
                 <span className={styles.providerName}>{p.label}</span>
                 <span className={styles.providerHint}>
-                  {p.available && p.via ? VIA_TEXT[p.via] : `set ${p.key_env ?? "a key"} to enable`}
+                  {p.available && p.via ? VIA_TEXT[p.via] : `add a ${p.label.split(" ")[0]} key above to enable`}
                 </span>
               </div>
               {p.key_env && <code className={styles.env}>{p.key_env}</code>}

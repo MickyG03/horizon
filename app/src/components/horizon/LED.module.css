@@ -42,7 +42,16 @@
 }
 
 :global([data-theme="light"]) .led {
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--led-color) 25%, transparent),
-    inset 0 -1px 1px rgb(0 0 0 / 15%);
+  background: var(--led-color);
+  box-shadow: none;
+}
+
+:global([data-theme="light"]) .led[data-pulse] {
+  animation-name: pulse-flat;
+}
+
+@keyframes pulse-flat {
+  50% {
+    opacity: 0.45;
+  }
 }

@@ -8,9 +8,12 @@ import { useMemo } from "react";
 import { LED } from "@/components/horizon/LED";
 import { Badge } from "@/components/primitives/Badge";
 import { EmptyState } from "@/components/primitives/EmptyState";
-import { Select } from "@/components/primitives/Field";
+import { Combobox } from "@/components/primitives/Combobox";
 import table from "@/components/primitives/Table.module.css";
 import { PageHeader } from "@/components/shell/PageHeader";
+import { PageSkeleton } from "@/components/primitives/Skeleton";
+import { envItems } from "@/lib/envs";
+import { useHydrated } from "@/lib/hydrated";
 import { fmtArgs, fmtDuration, fmtPercent, fmtRelative, fmtTokens } from "@/lib/format";
 import { useCompare, useEnvs, useJobs } from "@/lib/queries";
 import { jobStatusColor } from "@/lib/triage";
@@ -37,8 +40,9 @@ export function CompareView() {
   const { data: envs = [] } = useEnvs();
   const { data: jobs = [] } = useJobs({ limit: 200 });
 
+  const items = useMemo(() => envItems(envs, jobs), [envs, jobs]);
   const selectedJobs = jobs.filter((j) => selected.includes(j.id));
-  const envId = envParam || selectedJobs[0]?.env_id || envs[0]?.id || "";
+  const envId = envParam || selectedJobs[0]?.env_id || items[0]?.value || "";
   const candidates = jobs.filter((j) => j.env_id === envId && j.status !== "queued");
   const compare = useCompare(selected);
 
@@ -51,10 +55,14 @@ export function CompareView() {
     router.replace(`${pathname}?${q.toString()}`);
   };
 
+  const hydrated = useHydrated();
+
   const toggle = (job: Job) =>
     update({
       jobs: selected.includes(job.id) ? selected.filter((id) => id !== job.id) : [...selected, job.id],
     });
+
+  if (!hydrated) return <PageSkeleton tiles={0} panels={1} />;
 
   return (
     <div className={styles.page}>
@@ -65,17 +73,18 @@ export function CompareView() {
       />
 
       <div className={styles.picker}>
-        <Select
-          value={envId}
-          onChange={(e) => update({ env: e.target.value, jobs: [] })}
-          aria-label="Environment"
-        >
-          {envs.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.name}
-            </option>
-          ))}
-        </Select>
+        <div className={styles.pickerRow}>
+          <span className={styles.pickerLabel}>Environment</span>
+          <Combobox
+            value={envId}
+            onChange={(v) => update({ env: v, jobs: [] })}
+            items={items}
+            placeholder="Choose an environment"
+            searchPlaceholder="Search environments…"
+            size="sm"
+            aria-label="Environment"
+          />
+        </div>
         <div className={styles.chips}>
           {candidates.length === 0 && (
             <span className={styles.none}>No finished jobs on this environment.</span>

@@ -177,6 +177,16 @@ export interface Provider {
   via: "provider_key" | "hud_gateway" | "base_url" | null;
 }
 
+export interface ProviderKey {
+  provider: "anthropic" | "openai" | "gemini" | "hud";
+  label: string;
+  env: string;
+  url: string;
+  set: boolean;
+  hint: string | null;
+  saved_by_horizon: boolean;
+}
+
 export interface JobCreate {
   env_id: string;
   agent_type: AgentType;

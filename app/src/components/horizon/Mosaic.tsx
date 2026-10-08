@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import styles from "./Mosaic.module.css";
 
-type Shape = "ring" | "band" | "field";
+type Shape = "ring" | "band" | "field" | "rise";
 
 type MosaicProps = {
   /* ring: a pixel half-ring standing on the bottom edge (for the gauge); band: brightest along
@@ -90,6 +90,9 @@ export function Mosaic({
             w = Math.max(0, 1 - Math.abs(d - 0.72) / 0.13);
             const angle = Math.atan2(dy, -dx) / Math.PI; // 0 at the left end, 1 at the right
             if (angle > sweep) w *= 0.18;
+          } else if (shape === "rise") {
+            // dense along the bottom edge, thinning out as it climbs
+            w = Math.pow(y, 2.2) * Math.min(1, x * 6, (1 - x) * 6);
           } else if (shape === "band") {
             w = (1 - Math.abs(y - 0.5) * 2) * Math.min(1, x * 4, (1 - x) * 4);
           } else {
