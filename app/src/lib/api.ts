@@ -1,5 +1,9 @@
 import type {
+  BuildCreate,
+  BuilderMachine,
   CompareResult,
+  EnvBuild,
+  EnvTemplate,
   Env,
   Job,
   JobAnalytics,
@@ -64,6 +68,19 @@ export const api = {
     reload: (id: string) => request<Env>(`/envs/${id}/reload`, { method: "POST" }),
     remove: (id: string) => request<void>(`/envs/${id}`, { method: "DELETE" }),
   },
+  builder: {
+    templates: () => request<EnvTemplate[]>("/builder/templates"),
+    machine: () => request<BuilderMachine>("/builder/machine"),
+    name: (name: string) =>
+      request<{ name: string; available: boolean; problem: string | null }>(
+        `/builder/names/${encodeURIComponent(name)}`,
+      ),
+    builds: () => request<EnvBuild[]>("/builder/builds"),
+    build: (id: string) => request<EnvBuild>(`/builder/builds/${id}`),
+    create: (body: BuildCreate) => request<EnvBuild>("/builder/builds", json(body)),
+    retry: (id: string, body: { install?: boolean; build_image?: boolean } = {}) =>
+      request<EnvBuild>(`/builder/builds/${id}/retry`, json(body)),
+  },
   jobs: {
     list: (params: { status?: string; env_id?: string; limit?: number } = {}) => {
       const q = new URLSearchParams();
@@ -107,4 +124,9 @@ export const keys = {
   run: (id: string) => ["runs", id] as const,
   probes: (envId: string) => ["envs", envId, "probes"] as const,
   compare: (ids: string[]) => ["compare", ...ids] as const,
+  templates: ["builder", "templates"] as const,
+  machine: ["builder", "machine"] as const,
+  builderName: (name: string) => ["builder", "name", name] as const,
+  builds: ["builder", "builds"] as const,
+  build: (id: string) => ["builder", "build", id] as const,
 };

@@ -32,6 +32,87 @@ export interface Env {
   last_loaded_at: string | null;
   load_error: string | null;
   probe_score: number | null;
+  python: string | null;
+  image: string | null;
+  template: string | null;
+}
+
+/* Environment builder (server/services/templates.py, services/builder.py). */
+export type TemplateRuntime = "local" | "docker" | "external";
+
+export interface TemplateSecret {
+  env: string;
+  label: string;
+  purpose: string;
+  url: string | null;
+  required: boolean;
+  scope: "global" | "env";
+  present: boolean;
+}
+
+export interface EnvTemplate {
+  id: string;
+  name: string;
+  summary: string;
+  description: string;
+  repo: string;
+  subdir: string | null;
+  sdk_example: boolean;
+  tasks_file: string;
+  env_name: string;
+  runtime: TemplateRuntime;
+  secrets: TemplateSecret[];
+  requirements: string[];
+  sample_tasks: string[];
+  install_default: boolean;
+  install_note: string | null;
+  next_steps: string[];
+  tags: string[];
+  docs_url: string;
+}
+
+export interface BuilderMachine {
+  uv: string | null;
+  git: string | null;
+  docker: string | null;
+  docker_ready: boolean;
+  docker_detail: string | null;
+  envs_dir: string;
+}
+
+export type BuildStepStatus = "pending" | "running" | "done" | "skipped" | "failed";
+
+export interface BuildStep {
+  key: "fetch" | "configure" | "install" | "image" | "register";
+  label: string;
+  status: BuildStepStatus;
+  detail: string | null;
+}
+
+export interface EnvBuild {
+  id: string;
+  template: string;
+  template_name: string;
+  runtime: TemplateRuntime;
+  name: string;
+  directory: string;
+  options: { install: boolean; build_image: boolean; secrets: string[] };
+  status: "running" | "succeeded" | "failed";
+  steps: BuildStep[];
+  log: string;
+  env_id: string | null;
+  error: string | null;
+  created_at: string;
+  finished_at: string | null;
+  next_steps: string[];
+}
+
+export interface BuildCreate {
+  template: string;
+  name: string;
+  secrets: Record<string, string>;
+  install?: boolean;
+  build_image?: boolean;
 }
 
 export interface JobSummary {

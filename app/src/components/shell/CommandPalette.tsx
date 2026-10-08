@@ -1,6 +1,6 @@
 "use client";
 
-import { Boxes, GitCompare, LayoutDashboard, ListChecks, Moon, Rocket, Search, Settings, Sun } from "lucide-react";
+import { Boxes, GitCompare, Hammer, LayoutDashboard, ListChecks, Moon, Rocket, Search, Settings, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -44,6 +44,7 @@ export function CommandPalette({ onNewRun }: { onNewRun: () => void }) {
     const go = (href: string) => () => router.push(href);
     const pages: Item[] = [
       { id: "new-run", group: "Actions", label: "New run", hint: "Launch an eval", icon: <Rocket size={14} />, run: onNewRun },
+      { id: "new-env", group: "Actions", label: "New environment", hint: "Build from a template", icon: <Hammer size={14} />, run: go("/envs/new") },
       { id: "theme", group: "Actions", label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme", icon: theme === "dark" ? <Sun size={14} /> : <Moon size={14} />, run: toggle },
       { id: "/", group: "Pages", label: "Overview", icon: <LayoutDashboard size={14} />, run: go("/") },
       { id: "/jobs", group: "Pages", label: "Jobs", icon: <ListChecks size={14} />, run: go("/jobs") },

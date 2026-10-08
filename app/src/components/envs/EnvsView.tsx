@@ -1,6 +1,6 @@
 "use client";
 
-import { Boxes, Play, RefreshCw, Trash2 } from "lucide-react";
+import { Boxes, Hammer, Play, RefreshCw, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, type CSSProperties } from "react";
 
@@ -25,7 +25,13 @@ export function EnvsView() {
       <PageHeader
         eyebrow="Environments"
         title="Tasks files Horizon knows about"
-        description="Register any HUD tasks file by path. Horizon reads the environment and its task templates; runs happen in their own subprocesses."
+        description="Start one from a template, or register any HUD tasks file by path. Horizon reads the environment and its task templates; runs happen in their own subprocesses."
+        actions={
+          <Link href="/envs/new" className={styles.newButton}>
+            <Hammer size={14} aria-hidden />
+            New environment
+          </Link>
+        }
       />
 
       <RegisterEnvForm />
@@ -34,7 +40,13 @@ export function EnvsView() {
         <EmptyState
           icon={<Boxes size={20} />}
           title="No environments yet"
-          description="Paste the absolute path of a tasks.py above. The hud quickstart's letter-count env is a good first one."
+          description="Build one from a template (Coding, Computer Use, Deep Research and more), or paste the absolute path of a tasks.py above."
+          action={
+            <Link href="/envs/new" className={styles.newButton}>
+              <Hammer size={14} aria-hidden />
+              New environment
+            </Link>
+          }
         />
       ) : (
         <div className={styles.grid}>
@@ -71,6 +83,12 @@ function EnvCard({ env, onRun, index }: { env: Env; onRun: () => void; index: nu
         </Link>
         <span className={styles.taskset}>{env.taskset_name}</span>
       </header>
+
+      {(env.image || env.python) && (
+        <div className={styles.runsIn}>
+          {env.image ? `runs in ${env.image}` : "runs in its own .venv"}
+        </div>
+      )}
 
       <div className={styles.path} title={env.path}>
         {env.path}

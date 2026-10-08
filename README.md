@@ -27,6 +27,15 @@ rollouts through `hud.eval.run.rollout`, one subprocess environment per run. Wor
 Gemini, Anthropic or OpenAI key, or any OpenAI-compatible server such as Ollama. No trace leaves
 your machine unless you turn sync on.
 
+**Builds environments from templates.** Pick Coding, Computer Use, Browser, Deep Research,
+WorldSim, ML Training or a blank starter and give it a name. Horizon downloads the template, names
+the environment, puts the keys it asks for in the right place (provider keys in `~/.hud/.env`,
+env-specific ones like `EXA_API_KEY` in the env's own `.env`, mode 600, never logged), runs
+`uv sync` and loads the tasks, with a live build log. Each env runs under its own `.venv`, so its
+dependencies never have to be installed next to Horizon's. Desktop templates also get their Docker
+image built when Docker is available; templates that need an H100 are scaffolded with the Modal
+commands to run them.
+
 **Streams every step as it happens.** The SDK has no callback API, but every step of a rollout
 passes through `Run.record`. Horizon wraps the agent so each step is persisted and pushed over SSE
 the moment it is recorded: prompts, reasoning, tool calls, grades. Job and run pages update live.
@@ -102,7 +111,7 @@ Next.js (app/)         SQLite (data/horizon.db)
 
 ```
 server/            FastAPI, Python 3.12
-  api/             routers: envs, jobs, runs, events (SSE), analytics, probes, providers
+  api/             routers: envs, builder, jobs, runs, events (SSE), analytics, probes, providers
   services/
     runner.py      expands a job into rollouts, streams steps, persists results
     agents.py      the streaming wrapper around hud agents; a scripted agent for probes/tests
@@ -110,13 +119,16 @@ server/            FastAPI, Python 3.12
     analytics.py   summaries, histograms, GRPO group statistics
     probes.py      grader probes
     envs.py        registry; scripts/inspect_tasks.py describes a tasks file in a subprocess
+    interpreters.py  an env's own .venv and .env; serves it with that interpreter
+    templates.py   the builder's template catalog
+    builder.py     fetch, configure, install, image, register, as a background build
   db/              SQLModel tables: envs, jobs, runs, steps, probe_results
 app/               Next.js 16, TypeScript, CSS Modules. No Tailwind.
   theme/           every design token: colors (dusk/dawn), type scale, spacing, borders,
                    shadows, motion, layers, surfaces
   src/components/  shell, horizon (backdrop, gauge, LED, stat tile, knurled slider), charts,
                    jobs, trace, envs, compare, settings
-envs/              your environments (empty by default; register any path)
+envs/              environments the builder creates (git-ignored; register any other path too)
 ```
 
 ### The one seam in the SDK

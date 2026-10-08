@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { api, keys } from "./api";
-import type { JobCreate } from "@/types/api";
+import type { BuildCreate, JobCreate } from "@/types/api";
 
 export const useHealth = () =>
   useQuery({ queryKey: keys.health, queryFn: api.health, retry: false, refetchInterval: 15_000 });
@@ -111,6 +112,68 @@ export function useDeleteEnv() {
   return useMutation({
     mutationFn: (id: string) => api.envs.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.envs }),
+  });
+}
+
+export const useTemplates = () =>
+  useQuery({ queryKey: keys.templates, queryFn: api.builder.templates });
+
+export const useBuilderMachine = () =>
+  useQuery({ queryKey: keys.machine, queryFn: api.builder.machine, staleTime: 30_000 });
+
+export const useNameCheck = (name: string) =>
+  useQuery({
+    queryKey: keys.builderName(name),
+    queryFn: () => api.builder.name(name),
+    enabled: name.length > 0,
+    staleTime: 5_000,
+  });
+
+export const useBuilds = () =>
+  useQuery({
+    queryKey: keys.builds,
+    queryFn: api.builder.builds,
+    refetchInterval: (query) =>
+      query.state.data?.some((b) => b.status === "running") ? 2_000 : false,
+  });
+
+/* A build polls while it runs; when it lands, the env list and key status have changed. */
+export function useBuild(id: string | null) {
+  const qc = useQueryClient();
+  const query = useQuery({
+    queryKey: keys.build(id ?? ""),
+    queryFn: () => api.builder.build(id!),
+    enabled: id !== null,
+    refetchInterval: (q) => (q.state.data?.status === "running" ? 800 : false),
+  });
+  const status = query.data?.status;
+  useEffect(() => {
+    if (!status || status === "running") return;
+    qc.invalidateQueries({ queryKey: keys.envs });
+    qc.invalidateQueries({ queryKey: keys.keys });
+    qc.invalidateQueries({ queryKey: keys.templates });
+    qc.invalidateQueries({ queryKey: keys.builds });
+  }, [qc, status]);
+  return query;
+}
+
+export function useCreateBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: BuildCreate) => api.builder.create(body),
+    onSuccess: (build) => {
+      qc.setQueryData(keys.build(build.id), build);
+      qc.invalidateQueries({ queryKey: keys.builds });
+    },
+  });
+}
+
+export function useRetryBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; install?: boolean; build_image?: boolean }) =>
+      api.builder.retry(id, body),
+    onSuccess: (build) => qc.setQueryData(keys.build(build.id), build),
   });
 }
 
