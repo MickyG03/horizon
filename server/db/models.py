@@ -5,6 +5,7 @@ Job   - one launch of an env against an agent: tasks x group_size runs
 Run   - one rollout (id = hud trace id); carries reward, answer, error and the triage cause
 Step  - one recorded step of a run (agent turn, tool call, system error, task setup/evaluate)
 ProbeResult - one grader-health probe against one task
+EnvBuild - one environment created from a template by the builder
 """
 
 from datetime import UTC, datetime
@@ -30,6 +31,11 @@ class Env(SQLModel, table=True):
     last_loaded_at: datetime | None = None
     load_error: str | None = None
     probe_score: float | None = None  # fraction of probes the graders correctly rejected
+    # The env project's own interpreter (see services/interpreters.py); None means Horizon's.
+    python: str | None = None
+    # A Docker image every task runs in (desktop envs); None means a local subprocess.
+    image: str | None = None
+    template: str | None = None  # builder template it was created from, if any
 
 
 class Job(SQLModel, table=True):
@@ -102,3 +108,23 @@ class ProbeResult(SQLModel, table=True):
     accepted: bool = False  # True means the grader rewarded a junk answer
     error: str | None = None
     ran_at: datetime = Field(default_factory=utcnow)
+
+
+class EnvBuild(SQLModel, table=True):
+    """One run of the environment builder: fetch a template, configure, install, register."""
+
+    __tablename__ = "env_builds"
+
+    id: str = Field(primary_key=True)
+    template: str
+    name: str
+    directory: str
+    options: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))  # never secrets
+    status: str = Field(default="running", index=True)  # running|succeeded|failed
+    # [{key, label, status: pending|running|done|skipped|failed, detail}]
+    steps: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    log: str = ""
+    env_id: str | None = None
+    error: str | None = None
+    created_at: datetime = Field(default_factory=utcnow)
+    finished_at: datetime | None = None

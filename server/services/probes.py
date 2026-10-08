@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from sqlmodel import Session, select
@@ -59,9 +58,8 @@ async def run_probes(
     slugs: list[str] | None = None,
     max_concurrent: int = DEFAULT_CONCURRENCY,
 ) -> list[ProbeResult]:
-    source = Path(env.path)
-    taskset = await asyncio.to_thread(_load_taskset, source, slugs)
-    place = _placement(source)
+    taskset = await _load_taskset(env, slugs)
+    place = _placement(env)
     sem = asyncio.Semaphore(max(1, max_concurrent))
 
     jobs = [

@@ -33,6 +33,15 @@ def _annotation(param: inspect.Parameter) -> str | None:
     return ann.__name__ if isinstance(ann, type) else str(ann)
 
 
+def _spec(task: Any) -> dict[str, Any] | None:
+    try:
+        spec = task.model_dump(mode="json")
+        json.dumps(spec)
+        return spec
+    except Exception:  # noqa: BLE001 - args that aren't data; the task can only run from source
+        return None
+
+
 def describe(path: Path) -> dict[str, Any]:
     from hud.eval import Taskset
 
@@ -61,6 +70,9 @@ def describe(path: Path) -> dict[str, Any]:
                 "args": {k: _jsonable(v) for k, v in (task.args or {}).items()},
                 "description": (factory.description if factory is not None else "") or "",
                 "params": params,
+                # The task as plain data, so a server without the env's dependencies can still
+                # rebuild it (see services/runner.py).
+                "spec": _spec(task),
             }
         )
 

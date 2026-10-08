@@ -24,6 +24,9 @@ data/
 # Scratch environment used during setup (not part of the project)
 my-env/
 
+# Environments created by the builder: each is its own downloaded project, with its own .env
+envs/*
+
 # Editors / OS / assistant config
 .vscode/
 .idea/

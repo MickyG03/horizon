@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import sys
 import uuid
 from datetime import UTC, datetime
@@ -19,6 +18,7 @@ from sqlmodel import Session, select
 
 from config import SERVER_DIR
 from db.models import Env, Job, ProbeResult, Run, Step
+from services.interpreters import child_env, find_python
 
 INSPECT_SCRIPT = SERVER_DIR / "scripts" / "inspect_tasks.py"
 INSPECT_TIMEOUT_S = 120
@@ -41,9 +41,11 @@ def resolve_tasks_path(raw: str) -> Path:
 
 
 async def inspect_tasks_file(path: Path) -> dict[str, Any]:
-    env = {**os.environ, "HUD_TELEMETRY_ENABLED": "false", "PYTHONUNBUFFERED": "1"}
+    """Describe a tasks file, with the env project's interpreter when it has one."""
+    python = find_python(path)
+    env = {**child_env(path), "HUD_TELEMETRY_ENABLED": "false"}
     proc = await asyncio.create_subprocess_exec(
-        sys.executable,
+        str(python) if python else sys.executable,
         str(INSPECT_SCRIPT),
         str(path),
         stdout=asyncio.subprocess.PIPE,
@@ -70,7 +72,9 @@ async def inspect_tasks_file(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _apply(env: Env, info: dict[str, Any]) -> None:
+def _apply(env: Env, info: dict[str, Any], path: Path) -> None:
+    python = find_python(path)
+    env.python = str(python) if python else None
     env.name = info.get("env_name") or info["taskset_name"]
     env.taskset_name = info["taskset_name"]
     env.tasks = info["tasks"]
@@ -79,13 +83,19 @@ def _apply(env: Env, info: dict[str, Any]) -> None:
     env.load_error = None
 
 
-async def register(session: Session, raw_path: str) -> Env:
+async def register(
+    session: Session, raw_path: str, *, template: str | None = None, image: str | None = None
+) -> Env:
     path = resolve_tasks_path(raw_path)
     existing = session.exec(select(Env).where(Env.path == str(path))).first()
     info = await inspect_tasks_file(path)
 
     env = existing or Env(id=uuid.uuid4().hex[:12], name="", taskset_name="", path=str(path))
-    _apply(env, info)
+    _apply(env, info, path)
+    if template is not None:
+        env.template = template
+    if image is not None:
+        env.image = image
     session.add(env)
     session.commit()
     session.refresh(env)
@@ -101,7 +111,7 @@ async def reload(session: Session, env: Env) -> Env:
         session.add(env)
         session.commit()
         raise
-    _apply(env, info)
+    _apply(env, info, path)
     session.add(env)
     session.commit()
     session.refresh(env)
@@ -126,5 +136,8 @@ def delete_env(session: Session, env: Env) -> None:
         session.delete(job)
     for probe in session.exec(select(ProbeResult).where(ProbeResult.env_id == env.id)).all():
         session.delete(probe)
+    # No ORM relationships tie these rows together, so the unit of work may order the env's
+    # DELETE first; flush the children so the foreign keys never see an orphan.
+    session.flush()
     session.delete(env)
     session.commit()

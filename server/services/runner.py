@@ -21,7 +21,9 @@ from db.engine import engine
 from db.models import Env, Job, Run, Step
 from services.agents import build_agent
 from services.analytics import summarize_job
+from services.envs import inspect_tasks_file
 from services.events import bus, make_event
+from services.interpreters import ProjectRuntime, container_env
 from services.triage import classify
 
 log = logging.getLogger("horizon.runner")
@@ -63,10 +65,19 @@ class StepRecorder:
         )
 
 
-def _placement(source: Path):
+def _placement(env: Env):
+    """Where each task runs: the env's Docker image, its project interpreter, or Horizon's own."""
     from hud.eval import DockerRuntime, SubprocessRuntime
 
-    local = SubprocessRuntime(source)
+    source = Path(env.path)
+    if env.image:
+        return DockerRuntime(env.image, env_vars=container_env(source))
+    python = Path(env.python) if env.python else None
+    local = (
+        ProjectRuntime(source, python)
+        if python is not None and python.exists()
+        else SubprocessRuntime(source)
+    )
     docker: Any = None
 
     def place(task: Any):
@@ -80,10 +91,21 @@ def _placement(source: Path):
     return place
 
 
-def _load_taskset(source: Path, slugs: list[str] | None):
-    from hud.eval import Taskset
+async def _load_taskset(env: Env, slugs: list[str] | None):
+    """The env's tasks. An env with its own interpreter may import things Horizon doesn't have,
+    so it is described in a subprocess and rebuilt from plain data; anything else is imported."""
+    from hud.eval import Task, Taskset
 
-    taskset = Taskset.from_file(source)
+    source = Path(env.path)
+    if env.python or env.image:
+        info = await inspect_tasks_file(source)
+        missing = [t["slug"] for t in info["tasks"] if not t.get("spec")]
+        if missing:
+            raise ValueError(f"Tasks whose args aren't plain data can't run isolated: {missing}")
+        tasks = [Task.model_validate(t["spec"]) for t in info["tasks"]]
+        taskset = Taskset(info["taskset_name"], tasks)
+    else:
+        taskset = await asyncio.to_thread(Taskset.from_file, source)
     if slugs:
         taskset = taskset.filter(slugs)
     return taskset
@@ -149,18 +171,18 @@ class JobRunner:
             if env is None:
                 self._fail(session, job, "Environment no longer exists.")
                 return
+            env_row = Env.model_validate(env.model_dump())  # plain data, outlives the session
             job.status = "running"
             job.started_at = utcnow()
             session.add(job)
             session.commit()
             session.refresh(job)
-            source = Path(env.path)
             job_public = job.model_dump(mode="json")
 
         bus.publish(make_event("job.started", job_id=job_id, data=job_public))
 
         try:
-            taskset = await asyncio.to_thread(_load_taskset, source, job.task_filter)
+            taskset = await _load_taskset(env_row, job.task_filter)
             recorder = StepRecorder(job_id)
             agent = build_agent(
                 agent_type=job.agent_type,
@@ -169,7 +191,7 @@ class JobRunner:
                 agent_config=job.agent_config,
                 sink=recorder,
             )
-            place = _placement(source)
+            place = _placement(env_row)
             semaphore = asyncio.Semaphore(max(1, job.max_concurrent))
 
             plan: list[tuple[str, Any, str, int]] = []  # (run_id, task, group_id, attempt)

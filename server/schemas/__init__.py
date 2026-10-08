@@ -15,6 +15,20 @@ class EnvCreate(BaseModel):
     path: str = Field(min_length=1, description="Absolute path to a HUD tasks file")
 
 
+class BuildCreate(BaseModel):
+    template: str
+    name: str = Field(min_length=1, max_length=48)
+    # Secret values by variable name. Written to disk, never stored on the build or logged.
+    secrets: dict[str, str] = Field(default_factory=dict)
+    install: bool | None = Field(default=None, description="uv sync; template default if omitted")
+    build_image: bool = True
+
+
+class BuildRetry(BaseModel):
+    install: bool | None = None
+    build_image: bool | None = None
+
+
 class JobCreate(BaseModel):
     env_id: str
     agent_type: str = Field(pattern="^(" + "|".join(AGENT_TYPES) + ")$")
