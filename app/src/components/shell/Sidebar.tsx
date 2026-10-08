@@ -34,6 +34,9 @@ export function Sidebar({ onNewRun }: { onNewRun: () => void }) {
     <aside className={styles.sidebar}>
       <Link href="/" className={styles.brand} aria-label="Horizon home">
         <span className={styles.wordmark}>Horizon</span>
+        <span className={styles.poweredBy}>
+          powered by <span className={styles.hud}>hud</span>
+        </span>
       </Link>
 
       <div className={styles.actions}>
