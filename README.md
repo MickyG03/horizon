@@ -1,89 +1,101 @@
-# Horizon
+# Horizon: Local Eval Cockpit for HUD
+---
+Welcome to the Horizon repository! This repository contains the server and app for a local-first eval cockpit built on top of [HUD], the platform for building RL environments. Horizon runs any HUD tasks file against any model from your browser, streams every step as it happens, and gives an honest read on the result: which runs failed because the model was wrong, which because the grader is weak, and which because a provider returned a 503. It started when `hud eval` reported a three-task job as 67% FAILED even though the model had answered 2 of 2 correctly; the third run was a provider outage that the SDK graded as a zero. The server is built using Python, FastAPI and the hud SDK, and the app is built using Next.js and TypeScript.
 
-A local-first eval cockpit for [HUD](https://hud.ai) environments. Run any HUD tasks file against
-any model from the browser, watch every step stream in, and get an honest read on the result:
-which runs failed because the model was wrong, which because the grader is weak, and which because
-a provider returned a 503.
+## Features
 
-![Overview: the valid-reward gauge rising over the horizon, with infra failure rate, jobs, runs and grader health below.](docs/screenshots/overview.jpg)
+- Local Evals: Run HUD environments with your own Gemini, Anthropic or OpenAI key, or a local model through Ollama. Fully offline by default, no trace leaves your machine unless you turn sync on.
+- Live Step Streaming: Watch prompts, reasoning, tool calls and grades arrive as they happen. The hud SDK has no callback API, so Horizon wraps the agent's `Run.record`, the one path every step takes, and pushes each step over Server-Sent Events.
+- Failure Triage: Every run is labelled by cause: rate limited, provider unavailable, auth or credits, model not found, timeout, environment error, grader error, ran out of steps, malformed tool call, wrong answer or no answer.
+- Valid vs Raw Reward: Infrastructure failures are set aside, so every job shows the valid reward (the model's own result) next to the raw score hud.ai would report.
+- Grader Health Probes: Ten junk answers (empty, a refusal, the prompt echoed back, every digit at once, a bare "yes", filler, a JSON blob claiming success, a hedge) go through each task's real grader. Anything it rewards is reported with the exact string, as a reward-hacking risk.
+- Training Signal (GRPO): Run several attempts per task and see what GRPO would see: per-attempt advantages, variance, pass rate, and whether each task is learnable, saturated, impossible or flat.
+- Model Comparison: Pick jobs on the same environment and see per-task pass rates side by side, with valid reward, infra failures, tokens and time.
+- Environment Builder: Create an environment from a template (Coding, Computer Use, Browser, Deep Research, WorldSim, ML Training or a blank starter). Horizon downloads it, places its keys, runs `uv sync` and loads the tasks, with a live build log.
+- API Key Management: Add, replace or remove provider keys from Settings. They are saved to `~/.hud/.env`, the same file `hud set` uses, and only the last four characters are ever shown.
+- Advanced Search: Find environments, jobs and pages from anywhere with the command palette (Ctrl/Cmd + K), and pick environments from a searchable, paginated list ordered by most recent use.
+- Design: Glassmorphism backdrop, minimal cards and skeuomorphic controls, a pixel-mosaic motif, dark and light themes, and motion that respects reduced-motion settings.
 
-## Why
+## Results
+  ![overview](docs/screenshots/overview.jpg)
+  ![overview-light](docs/screenshots/overview-light.jpg)
+  ![job](docs/screenshots/job.jpg)
+  ![training-signal](docs/screenshots/training-signal.jpg)
+  ![job-rate-limited](docs/screenshots/job-rate-limited.jpg)
+  ![trace](docs/screenshots/trace.jpg)
+  ![grader-health](docs/screenshots/grader-health.jpg)
+  ![compare](docs/screenshots/compare.jpg)
+  ![new-environment](docs/screenshots/new-environment.jpg)
+  ![settings](docs/screenshots/settings.jpg)
 
-Running `hud eval` on a three-task environment produced a job that hud.ai reported as **67%,
-FAILED**. The model had actually answered 2 of 2 correctly; the third run was a provider outage.
-The SDK swallows that exception into a string on a system step and still grades the run with
-`answer=None`, so it lands as a reward of 0 and drags the mean down. Nothing on the dashboard
-distinguished "wrong answer" from "network error", nothing flagged that the task's grader accepts
-`1 2 3` as a correct count, and nothing said whether any of the tasks carried training signal.
 
-Horizon is the tool I wanted at that moment. It runs the same SDK, locally, and answers those
-questions.
 
-## What it does
 
-**Runs evals locally, fully offline by default.** Register a tasks file by path; Horizon describes
-it in a subprocess (user code never runs inside the server), then launches `tasks × group_size`
-rollouts through `hud.eval.run.rollout`, one subprocess environment per run. Works with your own
-Gemini, Anthropic or OpenAI key, or any OpenAI-compatible server such as Ollama. No trace leaves
-your machine unless you turn sync on.
+## Getting Started
+To get started with Horizon, follow the steps:
 
-**Builds environments from templates.** Pick Coding, Computer Use, Browser, Deep Research,
-WorldSim, ML Training or a blank starter and give it a name. Horizon downloads the template, names
-the environment, puts the keys it asks for in the right place (provider keys in `~/.hud/.env`,
-env-specific ones like `EXA_API_KEY` in the env's own `.env`, mode 600, never logged), runs
-`uv sync` and loads the tasks, with a live build log. Each env runs under its own `.venv`, so its
-dependencies never have to be installed next to Horizon's. Desktop templates also get their Docker
-image built when Docker is available; templates that need an H100 are scaffolded with the Modal
-commands to run them.
-
-**Streams every step as it happens.** The SDK has no callback API, but every step of a rollout
-passes through `Run.record`. Horizon wraps the agent so each step is persisted and pushed over SSE
-the moment it is recorded: prompts, reasoning, tool calls, grades. Job and run pages update live.
-
-**Triages every failure by cause.** Rate limited, provider unavailable, auth or credits, model not
-found, timeout, environment error, grader error, ran out of steps, malformed tool call, wrong
-answer, no answer. Causes that aren't the model's doing are set aside, and every job shows the
-**valid reward** next to the **raw** one hud.ai would report.
-
-![Job detail: every attempt was rate limited. The gauge stays empty and says why, where hud.ai would show 0%.](docs/screenshots/job-rate-limited.jpg)
-
-![Job detail: valid reward gauge, score distribution and triage breakdown.](docs/screenshots/job.jpg)
-
-**Probes graders for reward hacking.** Ten junk answers (an empty reply, a refusal, the prompt
-echoed back, every digit at once, a bare "yes", filler, a JSON blob claiming success, a hedge
-across several answers) go through each task's real grading path. Anything the grader accepts is
-reported with the exact string that got through. The HUD quickstart's letter-count grader scores
-80%: it rewards `0 1 2 3 4 5 6 7 8 9`.
-
-![Grader health: 80% of probes rejected; all_digits and hedge were rewarded.](docs/screenshots/grader-health.jpg)
-
-**Measures training signal.** Run a group of attempts per task and Horizon computes what GRPO
-would see: per-attempt advantages, variance, pass rate, and a class per task: learnable, saturated,
-impossible or flat. A job-level number says what fraction of tasks contribute zero gradient. In the
-run below, a small model gets blueberry wrong every time and the other two right every time, so
-the taskset would teach it nothing at this group size.
-
-![Training signal panel: 100% zero-gradient tasks, one impossible, two saturated.](docs/screenshots/training-signal.jpg)
-
-**Compares models per task.** Pick jobs on the same environment and see pass rates side by side,
-with valid reward, infra failures, tokens and time per job.
-
-![Compare: three jobs on the letter-count environment.](docs/screenshots/compare.jpg)
-
-## Quickstart
-
-Requirements: Python 3.12, [uv](https://docs.astral.sh/uv/), Node 22, pnpm. Linux or macOS (the
-hud SDK needs `fcntl`; on Windows use WSL).
-
-```bash
-cp .env.example .env     # add at least one provider key, or rely on ~/.hud/.env
-make setup               # uv sync + pnpm install
-make dev                 # API on :8000, app on :3000
+#### 1. Clone the repository:
+```sh
+git clone "https://github.com/MickyG03/horizon.git"
+```
+#### 2. Linux, macOS or WSL:
+The hud SDK needs a Unix system (it uses `fcntl`). On Windows, install [WSL] with Ubuntu and run every step below inside it.
+```sh
+wsl --install -d Ubuntu
 ```
 
-Open http://localhost:3000, go to Environments, paste the absolute path of a tasks file, and press
-Run. The HUD quickstart's `letter-count` is a fine first environment:
+#### 3. Install uv and Python 3.12:
+While both pip and uv are viable options, I lean towards uv because it installs the right Python version for you and resolves packages much faster.
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
+#### 4. Install Node JS and pnpm:
+[Node JS]: Make sure you have Node 22 installed on your system, then enable [pnpm] through corepack.
+```sh
+corepack enable
+```
+
+#### 5. Install Packages:
+```sh
+cd "horizon"
+make setup
+```
+
+#### 6. Get a model key:
+- Create a free key on [Google AI Studio] for Gemini, or use an [Anthropic] or [OpenAI] key.
+- You can also add keys later from the Settings page, or skip keys entirely and use a local model through [Ollama].
+
+#### 7. Create .env file:
+Copy .env.example to .env in the project folder and fill in these fields:
+```sh
+GEMINI_API_KEY = {your Gemini key}
+ANTHROPIC_API_KEY = {your Anthropic key}
+OPENAI_API_KEY = {your OpenAI key}
+OLLAMA_BASE_URL = http://localhost:11434/v1 (only for local models)
+HUD_API_KEY = {optional, only needed to sync traces to hud.ai}
+HUD_TELEMETRY_ENABLED = false (Horizon runs fully offline by default)
+NEXT_PUBLIC_API_URL = http://localhost:8000
+```
+
+#### 8. Start the app:
+In the project directory, you can run:
+
+- `make dev` :
+Runs the server (port 8000) and the app (port 3000) together in development mode. Both reload when you make changes.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+- `make test` :
+Runs the server tests with pytest, including an end-to-end job through real hud subprocess runtimes, and type-checks the app.
+
+- `make lint` :
+Runs Ruff on the server and ESLint on the app.
+
+- `docker compose up --build` :
+Builds and starts both halves in containers. Put tasks files under `./envs` and register them as `/envs/<name>/tasks.py`.
+
+#### 9. Register an environment and run it:
+Go to Environments, paste the absolute path of a HUD tasks file (or create one from a template), and press Run. The HUD quickstart's letter-count environment is a fine first one:
 ```python
 from hud import Environment
 
@@ -97,10 +109,50 @@ async def count_letter(word: str = "strawberry", letter: str = "r"):
 tasks = [count_letter(word=w) for w in ("strawberry", "raspberry", "blueberry")]
 ```
 
-Or with Docker: `docker compose up --build`, put tasks files under `./envs`, and register them as
-`/envs/<name>/tasks.py`.
+#### 10. Try the API:
+Open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactive API docs, or use [Postman]. Here are a few requests to test:
 
-## How it fits together
+```
+1. Health
+Get http://localhost:8000/api/health
+
+2. Register an environment
+Post http://localhost:8000/api/envs
+Body: {
+    "path":""
+}
+
+3. Launch a job
+Post http://localhost:8000/api/jobs
+Body: {
+    "env_id":"",
+    "agent_type":"gemini",
+    "model":"gemini-3.8-flash",
+    "group_size":3
+}
+
+4. Stream a job live (Server-Sent Events)
+Get http://localhost:8000/api/jobs/{job ID}/events
+
+5. Training signal and score distribution
+Get http://localhost:8000/api/jobs/{job ID}/analytics?bins=5
+
+6. Probe the graders
+Post http://localhost:8000/api/envs/{env ID}/probes
+
+7. Save a provider key
+Put http://localhost:8000/api/settings/keys/{anthropic | openai | gemini | hud}
+Body: {
+    "value":""
+}
+
+8. Environment templates
+Get http://localhost:8000/api/builder/templates
+
+and more in the Python files of the "server/api" directory.
+```
+
+## Architecture Flow Diagram
 
 ```
 browser ──HTTP + SSE──▶ FastAPI (server/) ──hud SDK──▶ rollout(task, agent, runtime=SubprocessRuntime)
@@ -110,72 +162,104 @@ Next.js (app/)         SQLite (data/horizon.db)
 ```
 
 ```
-server/            FastAPI, Python 3.12
-  api/             routers: envs, builder, jobs, runs, events (SSE), analytics, probes, providers
+server/              FastAPI, Python 3.12
+  api/               routers: envs, builder, jobs, runs, events (SSE), analytics, probes, providers, keys
   services/
-    runner.py      expands a job into rollouts, streams steps, persists results
-    agents.py      the streaming wrapper around hud agents; a scripted agent for probes/tests
-    triage.py      error text + stop reason + reward -> cause (pure, table-driven)
-    analytics.py   summaries, histograms, GRPO group statistics
-    probes.py      grader probes
-    envs.py        registry; scripts/inspect_tasks.py describes a tasks file in a subprocess
+    runner.py        expands a job into rollouts, streams steps, persists results
+    agents.py        the streaming wrapper around hud agents; a scripted agent for probes and tests
+    triage.py        error text + stop reason + reward -> cause (pure, table-driven)
+    analytics.py     summaries, histograms, GRPO group statistics
+    probes.py        grader probes
+    envs.py          registry; scripts/inspect_tasks.py describes a tasks file in a subprocess
     interpreters.py  an env's own .venv and .env; serves it with that interpreter
-    templates.py   the builder's template catalog
-    builder.py     fetch, configure, install, image, register, as a background build
-  db/              SQLModel tables: envs, jobs, runs, steps, probe_results
-app/               Next.js 16, TypeScript, CSS Modules. No Tailwind.
-  theme/           every design token: colors (dusk/dawn), type scale, spacing, borders,
-                   shadows, motion, layers, surfaces
-  src/components/  shell, horizon (backdrop, gauge, LED, stat tile, knurled slider), charts,
-                   jobs, trace, envs, compare, settings
-envs/              environments the builder creates (git-ignored; register any other path too)
+    templates.py     the builder's template catalog
+    builder.py       fetch, configure, install, image, register, as a background build
+    keys.py          provider keys in ~/.hud/.env
+  db/                SQLModel tables: envs, jobs, runs, steps, probe_results, env_builds
+app/                 Next.js 16, TypeScript, CSS Modules (no Tailwind)
+  theme/             every design token: colors, type scale, spacing, borders, shadows, motion
+  src/components/    shell, horizon (backdrop, gauge, mosaic, island), charts, jobs, trace, envs
+envs/                environments the builder creates (git-ignored)
 ```
 
-### The one seam in the SDK
+Why a provider outage looked like a wrong answer: the hud SDK's `agents/tool_agent.py` catches any exception from the provider, records it as a string on a system step and returns. `Run.__aexit__` then grades `trace.content`, which was never set, so the grader sees `None` and the run scores 0. Because grading succeeded, `Job.errors` doesn't count it. Horizon's triage reads the system step's text instead; `server/tests/test_triage.py::test_the_67_percent_story` is that job.
 
-`hud` 0.6 exposes no hooks for observing a rollout, but `Trace.record` is the single path every
-step takes, and `Run.record` is a plain method on a plain object. `services/agents.py` subclasses
-whichever agent class you picked and replaces `run.record` on each run with a wrapper that also
-hands the step to Horizon. Grading goes through the same method, so the final evaluate step arrives
-the same way. No fork, no monkeypatching of the SDK's modules.
 
-### Where the 67% comes from
 
-`agents/tool_agent.py` catches any exception from the provider, sets `trace.status = "error"`,
-records `Step(source="system", error=str(exc))`, and returns. `Run.__aexit__` then grades
-`trace.content`, which was never set, so the grader sees `None`. Because grading succeeded,
-`Job.errors` doesn't count the run as an error. Horizon's triage reads the system step's text
-instead and classifies it; `tests/test_triage.py::test_the_67_percent_story` is that job.
+## Tech
+For this project I have used following libraries:
+
+- [Python] - A programming language that lets you work quickly and integrate systems effectively. It runs the server and the hud SDK.
+- [uv] - An extremely fast Python package and project manager. It installs Python itself and keeps every environment's dependencies isolated in its own .venv.
+- [HUD SDK] - The open-source Python SDK for defining environments, tasks and graders, and running agents against them.
+- [FastAPI] - A modern, fast web framework for building APIs with Python, based on standard type hints.
+- [Uvicorn] - An ASGI web server implementation for Python, used to serve the FastAPI app.
+- [SQLModel] - A library for interacting with SQL databases from Python code, with Python objects. Used with [SQLite] to store environments, jobs, runs and steps.
+- [SSE Starlette] - Server-Sent Events for Starlette and FastAPI. It streams every recorded step to the browser as it happens.
+- [Pytest] - A framework that makes it easy to write small, readable tests, and scales to support complex functional testing.
+- [Ruff] - An extremely fast Python linter and code formatter.
+- [Next JS] - A React framework for building full-stack web applications.
+- [React JS] - A JavaScript library for building user interfaces.
+- [TypeScript] - A strongly typed programming language that builds on JavaScript.
+- [pnpm] - A fast, disk space efficient package manager for Node JS.
+- [TanStack Query] - Powerful asynchronous state management for TypeScript. It caches server data, and live events patch that cache directly.
+- [Motion] - A production-ready animation library for React, used for page transitions, the sliding nav indicator and count-ups.
+- [Radix UI] - Unstyled, accessible components. Used for dropdowns, dialogs, popovers and sliders, all styled from the project's own theme tokens.
+- [D3 Scale] - Encodings that map abstract data to visual representation, used for the charts.
+- [Lucide] - A beautiful and consistent icon toolkit.
+- [Docker] - A platform for building and running applications in containers. Used for the compose setup and desktop environments.
+- [GitHub Actions] - Continuous integration: lint, type-check, tests, production build and Docker image builds on every push.
 
 ## Development
 
-```bash
-make test   # pytest (server, includes an end-to-end job through real hud subprocess runtimes) + tsc
-make lint   # ruff + eslint
-```
+Want to contribute? Great!
+Contributions are welcome! If you have ideas for new features, improvements, or bug fixes, feel free to open an issue or submit a pull request.
 
-CI runs both halves and builds the Docker images.
+## References
 
-## Design
+1. https://www.hud.ai/
+2. https://docs.hud.ai/
+3. https://github.com/hud-evals/hud-python
+4. https://arxiv.org/abs/2402.03300
+5. https://fastapi.tiangolo.com/
+6. https://sqlmodel.tiangolo.com/
+7. https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
+8. https://docs.astral.sh/uv/
+9. https://nextjs.org/docs
+10. https://tanstack.com/query/latest/docs
+11. https://motion.dev/docs/react
+12. https://www.radix-ui.com/primitives/docs
+13. https://learn.microsoft.com/en-us/windows/wsl/install
+---
 
-The theme is a single set of CSS custom properties under `app/theme/`, built in three layers:
+[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
-- **Backdrop, glassmorphism.** Three soft fields of colour drift slowly behind everything.
-- **Cards, minimalism.** Frosted glass panels with one hairline and generous padding, nothing else.
-  Pill buttons, ink on paper.
-- **Controls, skeuomorphism.** Physical faders with a raised thumb and centre mark, switches whose
-  track fills with ink, a segmented control with a raised active segment, and a half-dial reward
-  gauge with a pixel ring that lights up as far as the score.
-
-Dark ("dusk") is the default; "dawn" is the light theme behind the switch. One sans family (Inter)
-for everything, heavier and tighter for headings, with JetBrains Mono for identifiers and numbers.
-The mosaic motif, square cells that dissolve in and shimmer, appears on the gauge, in empty states
-and as a pixel sweep across primary buttons. Pages fade in, lists stagger, run lamps switch on left
-to right, and numbers count up; all of it respects `prefers-reduced-motion`.
-
-## Roadmap
-
-- Sync jobs and traces from hud.ai (the REST client is in the SDK; the toggle is in settings).
-- Per-run log capture from the environment subprocess.
-- Estimated cost from a per-model price table (the SDK reports tokens, never cost).
-- A richer sample environment with a shell capability, to exercise tool steps in the timeline.
+   [HUD]: <https://www.hud.ai/>
+   [HUD SDK]: <https://github.com/hud-evals/hud-python>
+   [WSL]: <https://learn.microsoft.com/en-us/windows/wsl/install>
+   [Python]: <https://www.python.org/>
+   [uv]: <https://docs.astral.sh/uv/>
+   [Node JS]: <https://nodejs.org/en/download>
+   [pnpm]: <https://pnpm.io/>
+   [Google AI Studio]: <https://aistudio.google.com/apikey>
+   [Anthropic]: <https://console.anthropic.com/settings/keys>
+   [OpenAI]: <https://platform.openai.com/api-keys>
+   [Ollama]: <https://ollama.com/>
+   [Postman]: <https://www.postman.com/>
+   [FastAPI]: <https://fastapi.tiangolo.com/>
+   [Uvicorn]: <https://www.uvicorn.org/>
+   [SQLModel]: <https://sqlmodel.tiangolo.com/>
+   [SQLite]: <https://www.sqlite.org/>
+   [SSE Starlette]: <https://github.com/sysid/sse-starlette>
+   [Pytest]: <https://docs.pytest.org/>
+   [Ruff]: <https://docs.astral.sh/ruff/>
+   [Next JS]: <https://nextjs.org/>
+   [React JS]: <https://react.dev/>
+   [TypeScript]: <https://www.typescriptlang.org/>
+   [TanStack Query]: <https://tanstack.com/query/latest>
+   [Motion]: <https://motion.dev/>
+   [Radix UI]: <https://www.radix-ui.com/>
+   [D3 Scale]: <https://d3js.org/d3-scale>
+   [Lucide]: <https://lucide.dev/>
+   [Docker]: <https://www.docker.com/>
+   [GitHub Actions]: <https://github.com/features/actions>
