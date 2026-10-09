@@ -152,7 +152,15 @@ Get http://localhost:8000/api/builder/templates
 and more in the Python files of the "server/api" directory.
 ```
 
-## Architecture Flow Diagram
+## Flow Diagrams
+
+![flow-run](docs/diagrams/flow-run.png)
+
+![flow-stream](docs/diagrams/flow-stream.png)
+
+![flow-signal](docs/diagrams/flow-signal.png)
+
+![flow-builder](docs/diagrams/flow-builder.png)
 
 ```
 browser ──HTTP + SSE──▶ FastAPI (server/) ──hud SDK──▶ rollout(task, agent, runtime=SubprocessRuntime)
