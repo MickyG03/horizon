@@ -78,7 +78,10 @@ export const api = {
     builds: () => request<EnvBuild[]>("/builder/builds"),
     build: (id: string) => request<EnvBuild>(`/builder/builds/${id}`),
     create: (body: BuildCreate) => request<EnvBuild>("/builder/builds", json(body)),
-    retry: (id: string, body: { install?: boolean; build_image?: boolean } = {}) =>
+    retry: (
+      id: string,
+      body: { install?: boolean; build_image?: boolean; verify?: boolean } = {},
+    ) =>
       request<EnvBuild>(`/builder/builds/${id}/retry`, json(body)),
   },
   jobs: {

@@ -83,7 +83,7 @@ export interface BuilderMachine {
 export type BuildStepStatus = "pending" | "running" | "done" | "skipped" | "failed";
 
 export interface BuildStep {
-  key: "fetch" | "configure" | "install" | "image" | "register";
+  key: "fetch" | "configure" | "install" | "image" | "register" | "verify";
   label: string;
   status: BuildStepStatus;
   detail: string | null;
@@ -96,7 +96,7 @@ export interface EnvBuild {
   runtime: TemplateRuntime;
   name: string;
   directory: string;
-  options: { install: boolean; build_image: boolean; secrets: string[] };
+  options: { install: boolean; build_image: boolean; verify?: boolean; secrets: string[] };
   status: "running" | "succeeded" | "failed";
   steps: BuildStep[];
   log: string;
@@ -113,6 +113,7 @@ export interface BuildCreate {
   secrets: Record<string, string>;
   install?: boolean;
   build_image?: boolean;
+  verify?: boolean;
 }
 
 export interface JobSummary {

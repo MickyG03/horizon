@@ -100,13 +100,12 @@ def test_catalog_and_name_checks(envs_dir):
         assert bad.status_code == 400
 
 
-def test_build_from_template_end_to_end(envs_dir, monkeypatch):
-    """Fetch (stubbed), configure with a secret, skip install, register; then give the project
-    an interpreter of its own and run probes through it."""
+def _letters_template(monkeypatch, tasks_py: bytes) -> None:
+    """A "letters" template whose download is a local tarball holding `tasks_py`."""
     archive = _tarball(
         {
             "pyproject.toml": b"[project]\nname = 'letters'\n",
-            "tasks.py": FIXTURE.read_bytes(),
+            "tasks.py": tasks_py,
         }
     )
 
@@ -135,6 +134,12 @@ def test_build_from_template_end_to_end(envs_dir, monkeypatch):
         ),
     )
 
+
+def test_build_from_template_end_to_end(envs_dir, monkeypatch):
+    """Fetch (stubbed), configure with a secret, skip install, register, verify; then give the
+    project an interpreter of its own and run probes through it."""
+    _letters_template(monkeypatch, FIXTURE.read_bytes())
+
     with TestClient(app) as client:
         res = client.post(
             "/api/builder/builds",
@@ -155,9 +160,13 @@ def test_build_from_template_end_to_end(envs_dir, monkeypatch):
             "install": "skipped",
             "image": "skipped",
             "register": "done",
+            "verify": "done",
         }
+        verify = next(s for s in build["steps"] if s["key"] == "verify")
+        assert verify["detail"] == "3/3 tasks served and graded"
         assert "s3cret-value" not in build["log"]
         assert build["options"]["secrets"] == ["LETTERS_TOKEN"]
+        assert build["options"]["verify"] is True
 
         target = envs_dir / "my-letters"
         assert 'Environment(name="my-letters")' in (target / "tasks.py").read_text()
@@ -191,3 +200,37 @@ def test_build_from_template_end_to_end(envs_dir, monkeypatch):
         assert again.status_code == 400  # the directory exists now
 
         assert client.delete(f"/api/envs/{env['id']}").status_code == 204
+
+
+def test_verify_fails_when_a_grader_raises(envs_dir, monkeypatch):
+    """Tasks load, but every grade throws: verify fails with the first error, and a retry with
+    verify off skips it."""
+    grade = b"    yield 1.0 if answer and str(word.count(letter)) in answer else 0.0\n"
+    broken = FIXTURE.read_bytes().replace(grade, b'    raise RuntimeError("grader exploded")\n')
+    assert broken != FIXTURE.read_bytes()
+    _letters_template(monkeypatch, broken)
+
+    with TestClient(app) as client:
+        res = client.post(
+            "/api/builder/builds",
+            json={"template": "letters", "name": "broken-letters", "install": False},
+        )
+        assert res.status_code == 201, res.text
+        build = _wait(client, res.json()["id"])
+        assert build["status"] == "failed", build
+        steps = {s["key"]: s for s in build["steps"]}
+        assert steps["register"]["status"] == "done"
+        assert steps["verify"]["status"] == "failed"
+        assert steps["verify"]["detail"].startswith("3/3 tasks failed.")
+        assert "grader exploded" in steps["verify"]["detail"]
+        assert build["error"] == steps["verify"]["detail"]
+
+        retry = client.post(f"/api/builder/builds/{build['id']}/retry", json={"verify": False})
+        assert retry.status_code == 200, retry.text
+        build = _wait(client, build["id"])
+        assert build["status"] == "succeeded", build
+        steps = {s["key"]: s["status"] for s in build["steps"]}
+        assert steps["register"] == "done" and steps["verify"] == "skipped"
+        assert build["options"]["verify"] is False
+
+        assert client.delete(f"/api/envs/{build['env_id']}").status_code == 204

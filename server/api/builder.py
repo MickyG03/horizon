@@ -50,6 +50,7 @@ async def create_build(body: BuildCreate, session: SessionDep) -> dict:
             secrets=body.secrets,
             install=body.install,
             build_image=body.build_image,
+            verify=body.verify,
         )
     except BuildError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from None
@@ -68,7 +69,13 @@ async def retry_build(build_id: str, body: BuildRetry, session: SessionDep) -> d
         raise HTTPException(status.HTTP_409_CONFLICT, "Nothing to retry")
     try:
         return builder.view(
-            builder.retry(session, build, install=body.install, build_image=body.build_image)
+            builder.retry(
+                session,
+                build,
+                install=body.install,
+                build_image=body.build_image,
+                verify=body.verify,
+            )
         )
     except BuildError as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None

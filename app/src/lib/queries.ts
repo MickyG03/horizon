@@ -171,7 +171,15 @@ export function useCreateBuild() {
 export function useRetryBuild() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string; install?: boolean; build_image?: boolean }) =>
+    mutationFn: ({
+      id,
+      ...body
+    }: {
+      id: string;
+      install?: boolean;
+      build_image?: boolean;
+      verify?: boolean;
+    }) =>
       api.builder.retry(id, body),
     onSuccess: (build) => qc.setQueryData(keys.build(build.id), build),
   });

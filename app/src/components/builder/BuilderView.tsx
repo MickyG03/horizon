@@ -204,6 +204,7 @@ function Configure({
   const [secrets, setSecrets] = useState<Record<string, string>>({});
   const [install, setInstall] = useState(t.install_default);
   const [buildImage, setBuildImage] = useState(true);
+  const [verify, setVerify] = useState(true);
   const create = useCreateBuild();
   const check = useNameCheck(name);
 
@@ -252,6 +253,7 @@ function Configure({
       secrets,
       install,
       build_image: t.runtime === "docker" ? buildImage && dockerOk : false,
+      verify,
     });
     onStarted(build.id);
   };
@@ -325,6 +327,14 @@ function Configure({
                     ? "docker build -f Dockerfile.hud. Every run starts a fresh container."
                     : `${machine?.docker_detail ?? "Docker not found."} Build it later with Retry.`
                 }
+              />
+            )}
+            {t.runtime !== "external" && (
+              <Switch
+                checked={verify}
+                onChange={setVerify}
+                label="Verify after build"
+                hint="Run every task once with a scripted answer, so you know each one is served and graded."
               />
             )}
           </fieldset>

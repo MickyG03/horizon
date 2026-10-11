@@ -22,11 +22,13 @@ class BuildCreate(BaseModel):
     secrets: dict[str, str] = Field(default_factory=dict)
     install: bool | None = Field(default=None, description="uv sync; template default if omitted")
     build_image: bool = True
+    verify: bool = True
 
 
 class BuildRetry(BaseModel):
     install: bool | None = None
     build_image: bool | None = None
+    verify: bool = True
 
 
 class JobCreate(BaseModel):

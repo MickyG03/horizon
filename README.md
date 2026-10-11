@@ -11,7 +11,7 @@ Welcome to the Horizon repository! This repository contains the server and app f
 - Grader Health Probes: Ten junk answers (empty, a refusal, the prompt echoed back, every digit at once, a bare "yes", filler, a JSON blob claiming success, a hedge) go through each task's real grader. Anything it rewards is reported with the exact string, as a reward-hacking risk.
 - Training Signal (GRPO): Run several attempts per task and see what GRPO would see: per-attempt advantages, variance, pass rate, and whether each task is learnable, saturated, impossible or flat.
 - Model Comparison: Pick jobs on the same environment and see per-task pass rates side by side, with valid reward, infra failures, tokens and time.
-- Environment Builder: Create an environment from a template (Coding, Computer Use, Browser, Deep Research, WorldSim, ML Training or a blank starter). Horizon downloads it, places its keys, runs `uv sync` and loads the tasks, with a live build log.
+- Environment Builder: Create an environment from a template (Coding, Computer Use, Browser, Deep Research, WorldSim, ML Training or a blank starter). Horizon downloads it, places its keys, runs `uv sync`, loads the tasks and runs each one once to check it is served and graded, with a live build log.
 - API Key Management: Add, replace or remove provider keys from Settings. They are saved to `~/.hud/.env`, the same file `hud set` uses, and only the last four characters are ever shown.
 - Advanced Search: Find environments, jobs and pages from anywhere with the command palette (Ctrl/Cmd + K), and pick environments from a searchable, paginated list ordered by most recent use.
 - Design: Glassmorphism backdrop, minimal cards and skeuomorphic controls, a pixel-mosaic motif, dark and light themes, and motion that respects reduced-motion settings.
@@ -26,6 +26,7 @@ Welcome to the Horizon repository! This repository contains the server and app f
   ![grader-health](docs/screenshots/grader-health.jpg)
   ![compare](docs/screenshots/compare.jpg)
   ![new-environment](docs/screenshots/new-environment.jpg)
+  ![environment-build](docs/screenshots/environment-build.jpg)
   ![settings](docs/screenshots/settings.jpg)
 
 
@@ -181,7 +182,7 @@ server/              FastAPI, Python 3.12
     envs.py          registry; scripts/inspect_tasks.py describes a tasks file in a subprocess
     interpreters.py  an env's own .venv and .env; serves it with that interpreter
     templates.py     the builder's template catalog
-    builder.py       fetch, configure, install, image, register, as a background build
+    builder.py       fetch, configure, install, image, register, verify, as a background build
     keys.py          provider keys in ~/.hud/.env
   db/                SQLModel tables: envs, jobs, runs, steps, probe_results, env_builds
 app/                 Next.js 16, TypeScript, CSS Modules (no Tailwind)

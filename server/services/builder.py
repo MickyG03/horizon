@@ -1,6 +1,6 @@
 """The environment builder: from a template to a registered, runnable environment in one go.
 
-What `hud init` + README + `uv sync` + `hud eval` would have you do by hand, as five steps run in
+What `hud init` + README + `uv sync` + `hud eval` would have you do by hand, as six steps run in
 the background:
 
     fetch      download the template from GitHub into envs/<name>
@@ -8,6 +8,7 @@ the background:
     install    `uv sync`, so the env gets its own .venv (see services/interpreters.py)
     image      `docker build -f Dockerfile.hud` for desktop envs, when Docker is available
     register   describe the tasks file and add it to Horizon
+    verify     run every task once with a scripted agent, so serving and grading are known to work
 
 Secret values are only ever held in memory for the duration of a build, written to the env's own
 .env (mode 600) or ~/.hud/.env, and scrubbed from the build log.
@@ -34,8 +35,10 @@ from sqlmodel import Session, select
 
 from config import settings
 from db.engine import engine
-from db.models import EnvBuild
+from db.models import Env, EnvBuild
 from services import envs, keys
+from services.agents import ScriptedAgent, ScriptedConfig
+from services.runner import _load_taskset, _placement
 from services.templates import TEMPLATES, Template
 
 log = logging.getLogger(__name__)
@@ -46,6 +49,7 @@ STEPS: list[tuple[str, str]] = [
     ("install", "Install dependencies"),
     ("image", "Build Docker image"),
     ("register", "Load tasks"),
+    ("verify", "Verify tasks"),
 ]
 
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,47}$")
@@ -194,6 +198,7 @@ class Builder:
         secrets: dict[str, str],
         install: bool | None,
         build_image: bool,
+        verify: bool = True,
     ) -> EnvBuild:
         template = TEMPLATES.get(template_id)
         if template is None:
@@ -215,6 +220,7 @@ class Builder:
             options={
                 "install": template.install_default if install is None else install,
                 "build_image": build_image,
+                "verify": verify,
                 "secrets": sorted(secrets),  # names only
             },
             steps=[
@@ -229,7 +235,13 @@ class Builder:
         return build
 
     def retry(
-        self, session: Session, build: EnvBuild, *, install: bool | None, build_image: bool | None
+        self,
+        session: Session,
+        build: EnvBuild,
+        *,
+        install: bool | None,
+        build_image: bool | None,
+        verify: bool = True,
     ) -> EnvBuild:
         """Run every step that didn't finish again (and re-register, to pick up a new image).
         Secrets aren't kept, so configure only redoes the rename; keys entered earlier are saved."""
@@ -240,16 +252,23 @@ class Builder:
             options["install"] = install
         if build_image is not None:
             options["build_image"] = build_image
-        redo = [s["key"] for s in build.steps if s["status"] != "done"]
+        options["verify"] = verify
+        # Builds from before a step existed get it now.
+        known = {s["key"] for s in build.steps}
+        steps = build.steps + [
+            {"key": key, "label": label, "status": "pending", "detail": None}
+            for key, label in STEPS
+            if key not in known
+        ]
+        redo = [s["key"] for s in steps if s["status"] != "done"]
         if redo:
-            redo.append("register")
+            redo += ["register", "verify"]
         build.options = options
         build.status = "running"
         build.error = None
         build.finished_at = None
         build.steps = [
-            {**s, "status": "pending", "detail": None} if s["key"] in redo else s
-            for s in build.steps
+            {**s, "status": "pending", "detail": None} if s["key"] in redo else s for s in steps
         ]
         session.add(build)
         session.commit()
@@ -315,6 +334,7 @@ class Builder:
             "install": lambda: self._install(template, target, options, live),
             "image": lambda: self._image(template, target, options, live),
             "register": lambda: self._register(template, target, live, build_id),
+            "verify": lambda: self._verify(options, live, build_id),
         }
         status, error = "succeeded", None
         try:
@@ -499,6 +519,50 @@ class Builder:
         where = f"image {image}" if image else ("its own .venv" if isolated else "Horizon's venv")
         live.write(f"Registered {env_name}: {task_count} tasks, runs in {where}")
         return f"{task_count} tasks"
+
+    async def _verify(self, options: dict[str, Any], live: _Live, build_id: str) -> str:
+        """Serve and grade every task once with a scripted answer. Any reward passes: this checks
+        the plumbing, not the grader (that's what probes are for)."""
+        from hud.eval.run import rollout
+
+        if not options.get("verify", True):
+            raise StepSkipped("Turned off.")
+        with Session(engine) as session:
+            build = session.get(EnvBuild, build_id)
+            assert build is not None
+            register = next(s for s in build.steps if s["key"] == "register")
+            env = session.get(Env, build.env_id) if build.env_id else None
+        if register["status"] == "skipped":
+            raise StepSkipped("No tasks were loaded.")
+        if env is None:
+            raise StepFailed("The registered environment is gone.")
+
+        taskset = await _load_taskset(env, None)
+        place = _placement(env)
+        tasks = list(taskset.items())
+        live.write(f"Running {len(tasks)} tasks with a scripted agent")
+
+        async def one(task: Any):
+            return await rollout(task, ScriptedAgent(ScriptedConfig(answer="done")), runtime=place)
+
+        outcomes = await asyncio.gather(*(one(task) for _, task in tasks), return_exceptions=True)
+        errors: list[str] = []
+        for (slug, _), outcome in zip(tasks, outcomes, strict=True):
+            # rollout isolates failures: a grader that throws comes back as trace.error.
+            if isinstance(outcome, BaseException):
+                error: str | None = f"{type(outcome).__name__}: {outcome}"
+            else:
+                error = outcome.trace.error
+            if error:
+                errors.append(f"{slug}: {error}")
+                live.write(f"  ✗ {slug}: {error}")
+            else:
+                grade = getattr(outcome, "grade", None)
+                reward = getattr(grade, "reward", None) if grade is not None else None
+                live.write(f"  ✓ {slug} reward={reward}")
+        if errors:
+            raise StepFailed(f"{len(errors)}/{len(tasks)} tasks failed. {errors[0]}")
+        return f"{len(tasks)}/{len(tasks)} tasks served and graded"
 
 
 def image_tag(name: str) -> str:

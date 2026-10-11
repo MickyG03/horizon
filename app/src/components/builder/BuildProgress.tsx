@@ -43,6 +43,11 @@ export function BuildProgress({ id }: { id: string }) {
   if (!build) return <PageSkeleton tiles={0} panels={1} />;
 
   const running = build.status === "running";
+  // Ready means the tasks were served and graded, or verification was deliberately skipped.
+  const verify = build.steps.find((s) => s.key === "verify");
+  const ready =
+    build.status === "succeeded" && (verify?.status === "done" || verify?.status === "skipped");
+  const verifyOption = build.options.verify ?? true;
   const imageSkipped =
     build.runtime === "docker" &&
     build.steps.some((s) => s.key === "image" && s.status === "skipped");
@@ -60,13 +65,21 @@ export function BuildProgress({ id }: { id: string }) {
               color={
                 running
                   ? "var(--status-running)"
-                  : build.status === "succeeded"
+                  : ready
                     ? "var(--status-success)"
-                    : "var(--status-error)"
+                    : build.status === "succeeded"
+                      ? "var(--status-idle)"
+                      : "var(--status-error)"
               }
               pulse={running}
             />
-            {running ? "Building" : build.status === "succeeded" ? "Ready" : "Failed"}
+            {running
+              ? "Building"
+              : ready
+                ? "Ready"
+                : build.status === "succeeded"
+                  ? "Not verified"
+                  : "Failed"}
           </span>
         }
       >
@@ -104,7 +117,7 @@ export function BuildProgress({ id }: { id: string }) {
               variant="primary"
               icon={<RotateCcw size={14} />}
               loading={retry.isPending}
-              onClick={() => retry.mutate({ id: build.id })}
+              onClick={() => retry.mutate({ id: build.id, verify: verifyOption })}
             >
               Retry
             </Button>
@@ -114,7 +127,7 @@ export function BuildProgress({ id }: { id: string }) {
               variant="secondary"
               icon={<RotateCcw size={14} />}
               loading={retry.isPending}
-              onClick={() => retry.mutate({ id: build.id, build_image: true })}
+              onClick={() => retry.mutate({ id: build.id, build_image: true, verify: verifyOption })}
             >
               Build the Docker image
             </Button>
