@@ -58,6 +58,9 @@ async def inspect_tasks_file(path: Path) -> dict[str, Any]:
     except TimeoutError:
         proc.kill()
         raise EnvError(f"Loading {path.name} took longer than {INSPECT_TIMEOUT_S}s.") from None
+    except asyncio.CancelledError:  # a cancelled build, or shutdown
+        proc.kill()
+        raise
 
     text = out.decode(errors="replace").strip()
     # The script prints exactly one JSON line last; user code may print before it.

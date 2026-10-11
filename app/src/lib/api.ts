@@ -78,6 +78,7 @@ export const api = {
     builds: () => request<EnvBuild[]>("/builder/builds"),
     build: (id: string) => request<EnvBuild>(`/builder/builds/${id}`),
     create: (body: BuildCreate) => request<EnvBuild>("/builder/builds", json(body)),
+    cancel: (id: string) => request<EnvBuild>(`/builder/builds/${id}/cancel`, { method: "POST" }),
     retry: (
       id: string,
       body: { install?: boolean; build_image?: boolean; verify?: boolean } = {},

@@ -121,7 +121,9 @@ export function BuilderView() {
                             ? "var(--status-success)"
                             : b.status === "failed"
                               ? "var(--status-error)"
-                              : "var(--status-running)"
+                              : b.status === "cancelled"
+                                ? "var(--status-warn)"
+                                : "var(--status-running)"
                         }
                         pulse={b.status === "running"}
                         size={7}

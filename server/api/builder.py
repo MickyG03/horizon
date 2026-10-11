@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from db.engine import SessionDep
 from db.models import EnvBuild
 from schemas import BuildCreate, BuildRetry
+from services.build_stats import typical_seconds
 from services.builder import BuildError, builder, catalog, check_name, machine
 
 router = APIRouter(prefix="/builder", tags=["builder"])
@@ -59,7 +60,23 @@ async def create_build(body: BuildCreate, session: SessionDep) -> dict:
 
 @router.get("/builds/{build_id}")
 def get_build(build_id: str, session: SessionDep) -> dict:
-    return builder.view(_get(session, build_id))
+    build = _get(session, build_id)
+    data = builder.view(build)
+    # While it runs, how long each step usually takes, so the page can call out a slow one.
+    if build.status == "running":
+        data["typical"] = typical_seconds(session, build.template, exclude=build.id)
+    return data
+
+
+@router.post("/builds/{build_id}/cancel")
+async def cancel_build(build_id: str, session: SessionDep) -> dict:
+    build = _get(session, build_id)
+    try:
+        await builder.cancel(build_id)
+    except BuildError as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None
+    session.refresh(build)
+    return builder.view(build)
 
 
 @router.post("/builds/{build_id}/retry")

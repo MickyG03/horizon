@@ -168,6 +168,14 @@ export function useCreateBuild() {
   });
 }
 
+export function useCancelBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.builder.cancel(id),
+    onSuccess: (build) => qc.setQueryData(keys.build(build.id), build),
+  });
+}
+
 export function useRetryBuild() {
   const qc = useQueryClient();
   return useMutation({

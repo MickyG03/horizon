@@ -234,3 +234,63 @@ def test_verify_fails_when_a_grader_raises(envs_dir, monkeypatch):
         assert build["options"]["verify"] is False
 
         assert client.delete(f"/api/envs/{build['env_id']}").status_code == 204
+
+
+def test_cancel_a_running_build_then_retry(envs_dir, monkeypatch):
+    """Cancel while install runs a slow process: the process is killed, the build and its step
+    are cancelled, later steps stay pending, and Retry carries on from there."""
+
+    async def slow_install(self, template, target, options, live):
+        script = "import os, time; print('pid', os.getpid(), flush=True); time.sleep(120)"
+        await builder_mod._stream([sys.executable, "-c", script], target, {}, live, 300)
+        return "never"
+
+    _letters_template(monkeypatch, FIXTURE.read_bytes())
+    monkeypatch.setattr(builder_mod.Builder, "_install", slow_install)
+
+    with TestClient(app) as client:
+        build_id = client.post(
+            "/api/builder/builds",
+            json={"template": "letters", "name": "slow-letters", "install": True},
+        ).json()["id"]
+
+        deadline = time.monotonic() + 30
+        while "pid " not in (build := client.get(f"/api/builder/builds/{build_id}").json())["log"]:
+            assert time.monotonic() < deadline, build
+            time.sleep(0.1)
+        pid = int(build["log"].split("pid ", 1)[1].split()[0])
+
+        res = client.post(f"/api/builder/builds/{build_id}/cancel")
+        assert res.status_code == 200, res.text
+        build = res.json()
+        assert build["status"] == "cancelled" and build["error"] is None
+        steps = {s["key"]: s for s in build["steps"]}
+        assert {k: s["status"] for k, s in steps.items()} == {
+            "fetch": "done",
+            "configure": "done",
+            "install": "cancelled",
+            "image": "pending",
+            "register": "pending",
+            "verify": "pending",
+        }
+        for key in ("fetch", "configure", "install"):
+            assert steps[key]["started_at"] <= steps[key]["ended_at"], steps[key]
+        assert steps["image"]["started_at"] is None and steps["image"]["ended_at"] is None
+        with pytest.raises(ProcessLookupError):
+            os.kill(pid, 0)  # killed and reaped
+        assert client.post(f"/api/builder/builds/{build_id}/cancel").status_code == 409
+
+        async def quick_install(self, template, target, options, live):
+            return "stubbed"
+
+        monkeypatch.setattr(builder_mod.Builder, "_install", quick_install)
+        res = client.post(f"/api/builder/builds/{build_id}/retry", json={})
+        assert res.status_code == 200, res.text
+        build = _wait(client, build_id)
+        assert build["status"] == "succeeded", build
+        steps = {s["key"]: s for s in build["steps"]}
+        assert steps["install"]["status"] == "done" and steps["install"]["detail"] == "stubbed"
+        assert steps["register"]["status"] == "done" and build["env_id"]
+        assert steps["verify"]["status"] == "done"
+        assert all(s["ended_at"] for s in build["steps"])
+        assert client.delete(f"/api/envs/{build['env_id']}").status_code == 204

@@ -120,8 +120,9 @@ class EnvBuild(SQLModel, table=True):
     name: str
     directory: str
     options: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))  # never secrets
-    status: str = Field(default="running", index=True)  # running|succeeded|failed
-    # [{key, label, status: pending|running|done|skipped|failed, detail}]
+    status: str = Field(default="running", index=True)  # running|succeeded|failed|cancelled
+    # [{key, label, status: pending|running|done|skipped|failed|cancelled, detail,
+    #   started_at, ended_at}] (ISO times; reset when a retry makes the step pending again)
     steps: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
     log: str = ""
     env_id: str | None = None

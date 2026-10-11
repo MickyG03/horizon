@@ -23,6 +23,7 @@ import logging
 import os
 import re
 import shutil
+import signal
 import tarfile
 import uuid
 from collections.abc import Callable
@@ -56,6 +57,7 @@ NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,47}$")
 LOG_LINES = 600
 INSTALL_TIMEOUT_S = 45 * 60
 IMAGE_TIMEOUT_S = 60 * 60
+INTERRUPTED = "Interrupted: Horizon {} while this was building. Retry it."
 
 
 class BuildError(Exception):
@@ -72,6 +74,20 @@ class StepSkipped(Exception):
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def _moved(step: dict[str, Any], status: str, detail: str | None) -> dict[str, Any]:
+    """A step in its new status, with its clock started (running), stopped, or reset (pending)."""
+    now = utcnow().isoformat()
+    moved = {**step, "status": status, "detail": detail}
+    if status == "pending":
+        moved["started_at"] = moved["ended_at"] = None
+    elif status == "running":
+        moved["started_at"], moved["ended_at"] = now, None
+    else:
+        moved["started_at"] = step.get("started_at") or now
+        moved["ended_at"] = now
+    return moved
 
 
 # -- the machine ------------------------------------------------------------------------------
@@ -172,13 +188,15 @@ class Builder:
         self._tasks: dict[str, asyncio.Task[None]] = {}
         self._live: dict[str, _Live] = {}
         self._names: dict[str, str] = {}  # build id -> env name, while running
+        self._cancelling: set[str] = set()  # builds the user cancelled (vs. a server shutdown)
 
     def recover(self) -> None:
-        """Builds left 'running' by a previous server process will never finish; say so."""
+        """Builds left 'running' by a previous server process will never finish; say so.
+        When the running step stopped isn't known, so its ended_at stays empty."""
         with Session(engine) as session:
             for build in session.exec(select(EnvBuild).where(EnvBuild.status == "running")):
                 build.status = "failed"
-                build.error = "Interrupted: Horizon restarted while this was building. Retry it."
+                build.error = INTERRUPTED.format("restarted")
                 build.steps = [
                     {**s, "status": "failed"} if s["status"] == "running" else s
                     for s in build.steps
@@ -223,10 +241,7 @@ class Builder:
                 "verify": verify,
                 "secrets": sorted(secrets),  # names only
             },
-            steps=[
-                {"key": key, "label": label, "status": "pending", "detail": None}
-                for key, label in STEPS
-            ],
+            steps=[_moved({"key": key, "label": label}, "pending", None) for key, label in STEPS],
         )
         session.add(build)
         session.commit()
@@ -243,7 +258,8 @@ class Builder:
         build_image: bool | None,
         verify: bool = True,
     ) -> EnvBuild:
-        """Run every step that didn't finish again (and re-register, to pick up a new image).
+        """Run every step that didn't finish (failed, cancelled or never reached) again, and
+        re-register, to pick up a new image.
         Secrets aren't kept, so configure only redoes the rename; keys entered earlier are saved."""
         if build.id in self._tasks:
             raise BuildError("This build is still running.")
@@ -256,7 +272,7 @@ class Builder:
         # Builds from before a step existed get it now.
         known = {s["key"] for s in build.steps}
         steps = build.steps + [
-            {"key": key, "label": label, "status": "pending", "detail": None}
+            _moved({"key": key, "label": label}, "pending", None)
             for key, label in STEPS
             if key not in known
         ]
@@ -267,9 +283,7 @@ class Builder:
         build.status = "running"
         build.error = None
         build.finished_at = None
-        build.steps = [
-            {**s, "status": "pending", "detail": None} if s["key"] in redo else s for s in steps
-        ]
+        build.steps = [_moved(s, "pending", None) if s["key"] in redo else s for s in steps]
         session.add(build)
         session.commit()
         session.refresh(build)
@@ -290,6 +304,23 @@ class Builder:
 
     def is_running(self, build_id: str) -> bool:
         return build_id in self._tasks
+
+    async def cancel(self, build_id: str) -> None:
+        """Stop a running build where it is (killing a running `uv sync` or `docker build`) and
+        wait until it has been recorded as cancelled. Retry picks up from the cancelled step."""
+        task = self._tasks.get(build_id)
+        if task is None:
+            raise BuildError("This build isn't running.")
+        self._cancelling.add(build_id)
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+        # A task cancelled before its first step never ran _run's cleanup; record it here.
+        with Session(engine) as session:
+            build = session.get(EnvBuild, build_id)
+            still_running = build is not None and build.status == "running"
+        if still_running:
+            self._finish(build_id, "cancelled", None, self._live.get(build_id))
 
     async def shutdown(self) -> None:
         for task in list(self._tasks.values()):
@@ -312,12 +343,15 @@ class Builder:
             self._names[build_id] = build.name
         task = asyncio.create_task(self._run(build_id, secrets, live))
         self._tasks[build_id] = task
+        task.add_done_callback(lambda done: self._forget(build_id, done))
 
-        def done(_: asyncio.Task[None]) -> None:
-            self._tasks.pop(build_id, None)
-            self._names.pop(build_id, None)
-
-        task.add_done_callback(done)
+    def _forget(self, build_id: str, task: asyncio.Task[None] | None = None) -> None:
+        """Drop a finished build's bookkeeping; `task` guards against a retry already relaunched."""
+        if task is not None and self._tasks.get(build_id) is not task:
+            return
+        self._tasks.pop(build_id, None)
+        self._names.pop(build_id, None)
+        self._cancelling.discard(build_id)
 
     async def _run(self, build_id: str, secrets: dict[str, str], live: _Live) -> None:
         with Session(engine) as session:
@@ -353,36 +387,44 @@ class Builder:
                     break
                 self._set_step(build_id, key, "done", detail, live)
         except asyncio.CancelledError:
-            status, error = "failed", "Horizon stopped while this was building."
-            raise
+            if build_id in self._cancelling:
+                live.write("✗ Cancelled.")
+                status, error = "cancelled", None  # the user's doing: end quietly
+            else:
+                status, error = "failed", INTERRUPTED.format("stopped")
+                raise
         except Exception as exc:  # noqa: BLE001 - surface anything unexpected on the build
             log.exception("build %s crashed", build_id)
             status, error = "failed", f"{type(exc).__name__}: {exc}"
             live.write(f"✗ {error}")
         finally:
-            with Session(engine) as session:
-                build = session.get(EnvBuild, build_id)
-                if build is not None:
-                    build.steps = [
-                        {**s, "status": "failed"} if s["status"] == "running" else s
-                        for s in build.steps
-                    ]
-                    build.status = status
-                    build.error = error
+            self._finish(build_id, status, error, live)
+
+    def _finish(self, build_id: str, status: str, error: str | None, live: _Live | None) -> None:
+        """Record how a build ended; the step that was running is stopped with it."""
+        step_status = "cancelled" if status == "cancelled" else "failed"
+        with Session(engine) as session:
+            build = session.get(EnvBuild, build_id)
+            if build is not None:
+                build.steps = [
+                    _moved(s, step_status, s["detail"]) if s["status"] == "running" else s
+                    for s in build.steps
+                ]
+                build.status = status
+                build.error = error
+                if live is not None:
                     build.log = "\n".join(live.lines)
-                    build.finished_at = utcnow()
-                    session.add(build)
-                    session.commit()
-            self._live.pop(build_id, None)
+                build.finished_at = utcnow()
+                session.add(build)
+                session.commit()
+        self._live.pop(build_id, None)
+        self._forget(build_id)
 
     def _set_step(self, build_id: str, key: str, status: str, detail: str | None, live: _Live):
         with Session(engine) as session:
             build = session.get(EnvBuild, build_id)
             assert build is not None
-            build.steps = [
-                {**s, "status": status, "detail": detail} if s["key"] == key else s
-                for s in build.steps
-            ]
+            build.steps = [_moved(s, status, detail) if s["key"] == key else s for s in build.steps]
             build.log = "\n".join(live.lines)
             session.add(build)
             session.commit()
@@ -406,7 +448,16 @@ class Builder:
         if archive is None:
             raise StepFailed(f"Couldn't download {template.repo} (tried {', '.join(refs)}).")
         live.write(f"  {len(archive) / 1e6:.1f} MB")
-        count = await asyncio.to_thread(_extract, archive, template.subdir, target)
+        extract = asyncio.ensure_future(
+            asyncio.to_thread(_extract, archive, template.subdir, target)
+        )
+        try:
+            count = await asyncio.shield(extract)
+        except asyncio.CancelledError:
+            # The thread can't be stopped: let it finish, then undo it so a retry starts clean.
+            await asyncio.wait([extract])
+            shutil.rmtree(target, ignore_errors=True)
+            raise
         live.write(f"Wrote {count} files to {target}")
         return f"{template.repo}@{used} · {count} files"
 
@@ -643,6 +694,9 @@ async def _stream(
         env=env,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
+        # Its own process group, so stopping it also stops what it started (uv's build
+        # backends, compilers), not just the top process.
+        start_new_session=os.name == "posix",
     )
     assert proc.stdout is not None
 
@@ -654,14 +708,36 @@ async def _stream(
     try:
         await asyncio.wait_for(asyncio.gather(pump(), proc.wait()), timeout=timeout)
     except TimeoutError:
-        proc.kill()
+        await _stop(proc)
         minutes = f"{timeout / 60:.0f} minutes"
         raise StepFailed(f"{Path(cmd[0]).name} took longer than {minutes}.") from None
     except asyncio.CancelledError:
-        proc.kill()
+        await _stop(proc)
         raise
     if proc.returncode != 0:
         raise StepFailed(f"{Path(cmd[0]).name} {cmd[1]} exited with code {proc.returncode}.")
+
+
+async def _stop(proc: asyncio.subprocess.Process, grace: float = 3) -> None:
+    """Stop a step's process group: SIGTERM first (docker build then cancels its build on the
+    daemon), SIGKILL if it's still there after `grace` seconds. Waits until it's gone."""
+
+    def send(sig: int) -> None:
+        with contextlib.suppress(ProcessLookupError, PermissionError):
+            if os.name == "posix":
+                os.killpg(proc.pid, sig)
+            elif sig == signal.SIGTERM:
+                proc.terminate()
+            else:
+                proc.kill()
+
+    send(signal.SIGTERM)
+    try:
+        await asyncio.wait_for(proc.wait(), timeout=grace)
+    except TimeoutError:
+        send(getattr(signal, "SIGKILL", signal.SIGTERM))
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(proc.wait(), timeout=grace)
 
 
 builder = Builder()

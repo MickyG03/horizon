@@ -80,13 +80,22 @@ export interface BuilderMachine {
   envs_dir: string;
 }
 
-export type BuildStepStatus = "pending" | "running" | "done" | "skipped" | "failed";
+export type BuildStepStatus =
+  | "pending"
+  | "running"
+  | "done"
+  | "skipped"
+  | "failed"
+  | "cancelled";
 
 export interface BuildStep {
   key: "fetch" | "configure" | "install" | "image" | "register" | "verify";
   label: string;
   status: BuildStepStatus;
   detail: string | null;
+  /* ISO times; absent on builds from before steps were timed. */
+  started_at?: string | null;
+  ended_at?: string | null;
 }
 
 export interface EnvBuild {
@@ -97,7 +106,7 @@ export interface EnvBuild {
   name: string;
   directory: string;
   options: { install: boolean; build_image: boolean; verify?: boolean; secrets: string[] };
-  status: "running" | "succeeded" | "failed";
+  status: "running" | "succeeded" | "failed" | "cancelled";
   steps: BuildStep[];
   log: string;
   env_id: string | null;
@@ -105,6 +114,8 @@ export interface EnvBuild {
   created_at: string;
   finished_at: string | null;
   next_steps: string[];
+  /* While running: median seconds per step over past builds of this template. */
+  typical?: Partial<Record<BuildStep["key"], number>>;
 }
 
 export interface BuildCreate {

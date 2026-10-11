@@ -33,6 +33,16 @@ export function fmtDuration(seconds: number | null | undefined): string {
   return `${h}h ${m % 60}m`;
 }
 
+/* Whole-second elapsed time for things a person waits on: 12s, 1m 40s, 1h 5m. */
+export function fmtElapsed(seconds: number | null | undefined): string {
+  if (seconds == null || Number.isNaN(seconds)) return "—";
+  const total = Math.max(0, Math.round(seconds));
+  if (total < 60) return `${total}s`;
+  const m = Math.floor(total / 60);
+  if (m < 60) return `${m}m ${total % 60}s`;
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+
 export function secondsBetween(a: string | null | undefined, b: string | null | undefined) {
   if (!a || !b) return null;
   return (new Date(b).getTime() - new Date(a).getTime()) / 1000;
